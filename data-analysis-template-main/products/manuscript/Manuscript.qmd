@@ -1,5 +1,5 @@
 ---
-title: "Example Manuscript Template for a Data Analysis Project"
+title: "Household Electric Power Consumption Analysis"
 subtitle: ""
 author: SRI LAKSHMI SUDHA GANNI
 date: "`r Sys.Date()`"
@@ -12,10 +12,6 @@ bibliography: ../../assets/dataanalysis-references.bib
 csl: ../../assets/apa.csl
 ---
 
-The structure below is one possible setup for a data analysis project (including the course project). For a manuscript, adjust as needed. 
-You don't need to have exactly these sections, but the content covering those sections should be addressed.
-
-This uses MS Word as output format. [See here](https://quarto.org/docs/output-formats/ms-word.html) for more information. You can switch to other formats, like html or pdf. See [the Quarto documentation](https://quarto.org/) for other formats.
 
 
 ```{r, echo=FALSE, message=FALSE}
@@ -27,8 +23,18 @@ library(knitr)
 
 
 # Summary/Abstract
-_Write a summary of your project._
-The Individual Household Electric Power Consumption dataset from the UCI Machine Learning Repository comprises minute-by-minute measurements of electric power consumption in a single household in France, collected from December 2006 to November 2010. It includes over 2 million observations, recording metrics such as global active power, voltage, and energy sub-metering. This extensive dataset is valuable for time series analysis and energy consumption behavior modeling, aiding in the development of energy efficiency strategies. In this project, we aim to explore the dataset, clean it, and perform a preliminary analysis to understand the data better. We will also investigate the relationship between energy consumption and other variables, such as temperature and humidity, to identify patterns and trends.
+
+    The Individual Household Electric Power Consumption dataset from the UCI Machine Learning Repository comprises minute-by-minute measurements of electric power consumption in a single household in France, collected from December 2006 to November 2010.
+    
+    It includes over 2 million observations, recording metrics such as:
+1)	Global active power
+2)	Voltage
+3)	Current intensity (Current in ampere)
+4)	Energy sub-metering – representing energy consumed in kitchen, laundry room, HVAC system and rest of the household.
+
+  This extensive dataset is valuable for time series analysis and energy consumption behavior modeling, aiding in the development of energy efficiency strategies.
+  
+  In this project, we aim to explore the dataset, clean it, and perform a preliminary analysis to understand the data better. We will also investigate the relationship between energy consumption and other variables, such as seasonality and sub components of different parts of the house to identify patterns and trends. These trends can be used to offer recommendations in terms of power production, appliance purchases, tax incentives for efficient HVAC systems, etc.
 
 
 
@@ -38,79 +44,91 @@ The Individual Household Electric Power Consumption dataset from the UCI Machine
 # Introduction 
 
 ## General Background Information
-_Provide enough background on your topic that others can understand the why and how of your analysis_ 
-Understanding household energy consumption is crucial for developing strategies to enhance energy efficiency and reduce environmental impact. The Individual Household Electric Power Consumption dataset provides detailed, minute-by-minute energy usage data from a single household, allowing for in-depth analysis of consumption patterns. This dataset supports analyses aimed at identifying factors that influence energy use, such as time of day or appliance operation. Analyzing this data helps in forecasting future energy needs and informing both consumers and policymakers on effective energy management practices.
+
+  Decarbonization of electric power grid is an important aspect of mitigating the impacts of global warming. As part of this effort governments around the world are focusing on both the addition of renewable energy sources such as solar and wind to the grid as well as reduction of household emissions. This project tries to address the second aspect of energy efficiency through analysis of household electricity usage. Understanding trends in this dataset is crucial for developing strategies to enhance energy efficiency and reduce environmental impact.
+  
+  The Individual Household Electric Power Consumption dataset provides detailed, time series usage data from a single household with a resolution of up to a minute. This allows for in-depth analysis of consumption patterns. This dataset supports analyses aimed at identifying factors that influence energy use, such as time of day or appliance operation. Analyzing this data helps in forecasting future energy needs and informing both consumers and policymakers on effective energy management practices.
+
 
 ## Description of data and data source
-_Describe what the data is, what it contains, where it is from, etc. Eventually this might be part of a methods section._
-The dataset, sourced from the UCI Machine Learning Repository, consists of minute-by-minute records of electric power consumption in a single household in France from December 2006 to November 2010. It features over 2 million data points, including measurements such as global active power, voltage, and energy consumption by different household sectors. This data is invaluable for understanding energy usage patterns and developing energy efficiency strategies.
+  The dataset, sourced from the UCI Machine Learning Repository, consists of minute-by-minute records of electric power consumption in a single household in France from December 2006 to November 2010.
+  
+  It features over 2 million data points, including measurements such as
+  
+1)	Global active power
+
+2)	Global reactive power
+
+3)	Voltage
+
+4)	Current intensity 
+
+5)	Energy consumption by different household appliances in kitchen laundry room and HVAC.
+
+  These output variables can be combined with input features such as time of day and year to identify the impact of seasonality and time of day on energy consumption
+
+
 
 ## Questions/Hypotheses to be addressed
-_State the research questions you plan to answer with this analysis._
-The research questions for this analysis are:
+
+  The research questions for this analysis are:
 
 1.How does household energy consumption vary throughout the day and across different seasons?
+
 2.What are the main drivers of variations in energy consumption within the household?
-3.Can we predict daily or weekly energy consumption patterns based on historical data?
-4.How effectively can machine learning models forecast short-term and long-term energy usage?
-5.What is the relationship between external factors like weather conditions and internal factors such as appliance use in determining energy consumption?
 
-To cite other work (important everywhere, but likely happens first in introduction), make sure your references are in the bibtex file specified in the YAML header above and have the right bibtex key. Then you can include like this:
-
-Examples of reproducible research projects can for instance be found in [@mckay2020; @mckay2020a].
-
-
+3.How effectively can machine learning models forecast short-term and long-term energy usage? 
 
 {{< pagebreak >}}
 
 
 # Methods 
 
-_Describe your methods. That should describe the data, the cleaning processes, and the analysis approaches. You might want to provide a shorter description here and all the details in the supplement._
-Methods Description
-Data
-The dataset, obtained from the UCI Machine Learning Repository, includes minute-by-minute electric power consumption data from a single household in France over four years. It records metrics like global active power, voltage, and sub-metering values.
+  Methods Description Data : 
+  Data Cleaning:
+  
+  The data cleaning process involves:
+  Removing entries with missing values. Converting date and time entries into a unified datetime format. Standardizing numeric values and handling outliers using statistical thresholds. 
+  
+Analysis Approaches:
 
-Data Cleaning
-The data cleaning process involves:
-
-Removing entries with missing values.
-Converting date and time entries into a unified datetime format.
-Standardizing numeric values and handling outliers using statistical thresholds.
-Analysis Approaches
-The analysis will utilize:
-
-Time Series Analysis: To model and forecast energy consumption trends.
-Regression Analysis: To identify key factors influencing power usage.
-Clustering: To categorize consumption patterns into distinct profiles.
-Machine Learning Models: Including Random Forest and Gradient Boosting to predict future consumption based on historical data.
-This methodology ensures a comprehensive understanding of household energy dynamics and facilitates the development of tailored energy-saving strategies.
+  The analysis will utilize:
+  
+  Time Series Analysis: To model and forecast energy consumption trends. 
+  
+  Regression Analysis: To identify key factors influencing power usage.
+  
+ Clustering: To categorize consumption patterns into distinct profiles.
+ 
+ Machine Learning Models: Regression techniques for time series analysis and k means clustering to identify categories of energy consumption by season. These methods ensure a comprehensive understanding of household energy dynamics and facilitates the development of tailored energy-saving strategies.
 
 ## Schematic of workflow
 
-Sometimes you might want to show a schematic diagram/figure that was not created with code (if you can do it with code, do it). @fig-schematic is an example of some - completely random/unrelated - schematic that was generated with Biorender.
-We store those figures in the `assets` folder.
 
 ```{r}
 #| label: fig-schematic
-#| fig-cap: "A figure that is manually generated and shows some overview/schematic. This has nothing to do with the data, it's just a random one from one of our projects I found and placed here."
+#| fig-cap: "A Flowchart of the Proposed Model."
 #| echo: FALSE
-knitr::include_graphics(here("assets","antigen-recognition.png"))
+knitr::include_graphics(here("assets","flowchart.png"))
 ```
 
 
 
 
 ## Data aquisition
-_As applicable, explain where and how you got the data. If you directly import the data from an online source, you can combine this section with the next._
-The dataset was obtained from the UCI Machine Learning Repository, specifically from their archive of machine learning datasets. It is publicly accessible online, allowing for direct download and integration into data analysis workflows. This data was originally collected to facilitate research on energy consumption patterns in households, providing a detailed, minute-by-minute log of electricity usage over a period of nearly four years. The dataset's comprehensive nature makes it ideal for developing predictive models and exploring energy usage dynamics.
+
+The dataset was obtained from the UCI Machine Learning Repository, specifically from their archive of machine learning datasets. It is publicly accessible online, allowing for direct download and integration into data analysis workflows. This data was originally collected to facilitate research on energy consumption patterns in households, providing a detailed, minute-by-minute log of electricity usage over a period of nearly four years. The dataset’s comprehensive nature makes it ideal for developing predictive models and exploring energy usage dynamics.
 
 ## Data import and cleaning
-_Write code that reads in the file and cleans it so it's ready for analysis. Since this will be fairly long code for most datasets, it might be a good idea to have it in one or several R scripts. If that is the case, explain here briefly what kind of cleaning/processing you do, and provide more details and well documented code somewhere (e.g. as supplement in a paper). All materials, including files that contain code, should be commented well so everyone can follow along._
+
 Brief Overview of Data Cleaning Steps:
+
 1.Data Import: Load the dataset into R using fread for efficient handling, especially given the large size of the dataset.
+
 2.Handling Missing Values: Identify and replace or remove missing entries, typically represented as "?" in this dataset.
+
 3.Data Type Conversion: Convert all pertinent columns to their appropriate data types, such as numeric for energy readings and datetime for timestamps.
+
 4.Outlier Detection and Removal: Identify statistical outliers in energy consumption readings and decide on a strategy for handling these, either through removal or capping.
 
 ```{r}
@@ -118,16 +136,13 @@ Brief Overview of Data Cleaning Steps:
 
 library(data.table)
 library(ggplot2)
-library(forecast)
-library(randomForest)
-library(factoextra)
+
 ```
 
 ```{r}
 #Load the Data:
 data <- fread("household_power_consumption.txt", sep=";", na.strings="?")
-# Convert Date and Time into POSIXct
-data[, datetime := as.POSIXct(paste(Date, Time), format="%d/%m/%Y %H:%M:%S")]
+
 # Convert other columns to numeric, handling NAs
 cols <- c("Global_active_power", "Global_reactive_power", "Voltage", "Global_intensity", "Sub_metering_1", "Sub_metering_2", "Sub_metering_3")
 data[, (cols) := lapply(.SD, as.numeric), .SDcols = cols]
@@ -143,122 +158,28 @@ data <- data[Global_active_power > (qnt[1] - 1.5*iqr) & Global_active_power < (q
 
 ```
 ## Statistical analysis
-_Explain anything related to your statistical analyses._
+
 For the Individual Household Electric Power Consumption dataset, statistical analyses could include:
 
 Descriptive Statistics: Computing mean, median, mode, variance, and standard deviation to understand the central tendencies and dispersion in energy consumption.
-Time Series Analysis: Using statistical models like ARIMA to forecast future power consumption based on historical data.
-Regression Analysis: Examining relationships between variables using linear or logistic regression to identify significant predictors of energy usage.
-Hypothesis Testing: Conducting tests such as t-tests or ANOVA to compare mean energy consumption across different times or conditions.
-For the analysis of the Individual Household Electric Power Consumption dataset, the approach includes several key methods:
 
-Time Series Analysis: This involves modeling and forecasting energy consumption trends to understand seasonal and time-based variations.
-Regression Analysis: Used to identify which factors significantly impact power usage, helping to pinpoint efficiency opportunities.
-Clustering: This method categorizes consumption patterns into distinct profiles, which can illustrate different usage behaviors within the household.
-Machine Learning Models: Techniques like Random Forest and Gradient Boosting will be employed to predict future consumption based on historical data. This comprehensive approach aids in understanding energy dynamics and supports the development of tailored strategies for energy saving.
+Time Series Analysis:To model and forecast energy consumption trends. 
 
+Regression Analysis: To identify key factors influencing power usage.
+ 
+Clustering: To categorize consumption patterns into distinct profiles.
+
+Machine Learning Models: Regression techniques for time series analysis and k means clustering to identify categories of energy consumption by season. These methods ensure a comprehensive understanding of household energy dynamics and facilitates the development of tailored energy-saving strategies.
 
 
-
-
-
-
-{{< pagebreak >}}
-
-
-# Results
-
-## Exploratory/Descriptive analysis
-
-_Use a combination of text/tables/figures to explore and describe your data. Show the most important descriptive results here. Additional ones should go in the supplement. Even more can be in the R and Quarto files that are part of your project._
 
 ```{r}
 summary_stats <- summary(data)
-# Convert Date and Time from character to Date and POSIXct format
-data$Date <- as.Date(data$Date, format="%d/%m/%Y")
-data$Time <- strptime(paste(data$Date, data$Time), format="%d/%m/%Y %H:%M:%S")
-
-# Create new columns for year, month, day, and hour
-data$year <- format(data$Date, "%Y")
-data$month <- format(data$Date, "%m")
-data$day <- format(data$Date, "%d")
-data$hour <- format(data$Time, "%H")
-
-# Now recalculate the summary including these new columns
-summary_stats_updated <- summary(data[, c("year", "month", "day", "hour", "Global_active_power")])
-```
-
-
-@tbl-summarytable shows a summary of the data.
-
-Note the loading of the data providing a **relative** path using the `../../` notation. (Two dots means a folder up). You never want to specify an **absolute** path like `C:\ahandel\myproject\results\` because if you share this with someone, it won't work for them since they don't have that path. You can also use the `here` R package to create paths. See examples of that below. I generally recommend the `here` package.
-
-```{r}
-#| label: tbl-summarytable
-#| tbl-cap: "Data summary table."
-#| echo: FALSE
-resulttable=readRDS("../../results/tables/summarytable.rds")
-knitr::kable(resulttable)
+print(summary_stats)
 ```
 
 
 
-## Basic statistical analysis
-
-_To get some further insight into your data, if reasonable you could compute simple statistics (e.g. simple models with 1 predictor) to look for associations between your outcome(s) and each individual predictor variable. Though note that unless you pre-specified the outcome and main exposure, any "p<0.05 means statistical significance" interpretation is not valid._
-
-
-@fig-result shows a scatterplot figure produced by one of the R scripts.
-
-```{r}
-#| label: fig-result
-#| fig-cap: "Height and weight stratified by gender."
-#| echo: FALSE
-knitr::include_graphics(here("results","figures","height-weight-stratified.png"))
-```
-
-
-## Full analysis
-
-_Use one or several suitable statistical/machine learning methods to analyze your data and to produce meaningful figures, tables, etc. This might again be code that is best placed in one or several separate R scripts that need to be well documented. You want the code to produce figures and data ready for display as tables, and save those. Then you load them here._
-
-Example @tbl-resulttable2 shows a summary of a linear model fit.
-
-```{r}
-#| label: tbl-resulttable2
-#| tbl-cap: "Linear model fit table."
-#| echo: FALSE
-resulttable2 = readRDS(here("results","tables","resulttable2.rds"))
-knitr::kable(resulttable2)
-```
-
-
-{{< pagebreak >}}
-
-
-# Discussion
-
-## Summary and Interpretation
-_Summarize what you did, what you found and what it means._
-
-## Strengths and Limitations
-_Discuss what you perceive as strengths and limitations of your analysis._
-
-## Conclusions
-_What are the main take-home messages?_
-
-_Include citations in your Rmd file using bibtex, the list of references will automatically be placed at the end_
-
-This paper [@leek2015] discusses types of analyses. 
-
-These papers [@mckay2020; @mckay2020a] are good examples of papers published using a fully reproducible setup similar to the one shown in this template. 
-
-Note that this cited reference will show up at the end of the document, the reference formatting is determined by the CSL file specified in the YAML header. Many more style files for almost any journal [are available](https://www.zotero.org/styles). You also specify the location of your bibtex reference file in the YAML. You can call your reference file anything you like.
-
-
-{{< pagebreak >}}
-
-# References
 
 
 

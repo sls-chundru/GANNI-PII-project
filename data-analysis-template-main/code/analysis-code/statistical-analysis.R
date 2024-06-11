@@ -53,4 +53,4 @@ print(lmtable2)
 table_file2 = here("results", "tables", "resulttable2.rds")
 saveRDS(lmtable2, file = table_file2)
 
-  
+

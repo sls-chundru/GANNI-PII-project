@@ -18,7 +18,7 @@ getwd()
 
 ```{r}
 # Import Data, Check Descriptive Statistics & Data Types
-data_location <- here::here("starter-analysis-exercise","code","final_project","Electric_Vehicle_Population_Data.csv")
+data_location <- here::here("Electric_Vehicle_Population_Data.csv")
 ev_data <- read.csv(data_location)
 summary(ev_data)
 dplyr::glimpse(ev_data)
@@ -58,7 +58,7 @@ max_msrp_outlier
 filter_msrp_outlier <- ev_data_filtered %>%
   filter(Base.MSRP != 845000) %>%
   filter(Base.MSRP != 0)
-filter_msrp_outlier
+#filter_msrp_outlier
 ```
 
 ```{r}
@@ -147,5 +147,5 @@ upper_bound
 ```{r}
 # Filter out outliers:
 ev_data_Filtered_2 <- ev_data_filtered[ev_data_filtered$Electric.Range > lower_bound & ev_data_filtered$Electric.Range < upper_bound, ]
-ev_data_Filtered_2
+#ev_data_Filtered_2
 ```

@@ -1,24 +1,27 @@
-library(data.table)
-library(ggplot2)
-library(forecast)
-library(randomForest)
-library(factoextra)
-#Load the Data:
-data <- fread("household_power_consumption.txt", sep=";", na.strings="?",, nrows=10000)
-# Convert Date and Time into POSIXct
-#data[, datetime := as.POSIXct(paste(Date, Time), format="%d/%m/%Y %H:%M:%S")]
-# Convert other columns to numeric, handling NAs
-cols <- c("Global_active_power", "Global_reactive_power", "Voltage", "Global_intensity", "Sub_metering_1", "Sub_metering_2", "Sub_metering_3")
-#data[, (cols) := lapply(.SD, as.numeric), .SDcols = cols]
+# Read CSV File
+ev_data <- read.csv("C:/Users/sri/OneDrive/Documents/GitHub/GANNI-PII-project/data-analysis-template-main/Electric_Vehicle_Population_Data.csv")
+head(data) # First 6 rows of the data
 
-# Remove rows with NA values
-data <- na.omit(data)
 
-# Remove outliers based on Global_active_power
-qnt <- quantile(data$Global_active_power, probs=c(.25, .75), na.rm = TRUE)
-caps <- quantile(data$Global_active_power, probs=c(.01, .99), na.rm = TRUE)
-iqr <- IQR(data$Global_active_power)
-data <- data[Global_active_power > (qnt[1] - 1.5*iqr) & Global_active_power < (qnt[2] + 1.5*iqr) & Global_active_power >= caps[1] & Global_active_power <= caps[2]]
+# Checking for Null values:
+total_na <- sum(is.na(ev_data))
+print(total_na)
 
-summary_stats <- summary(data)
-print(summary_stats)
+# Removing null values:
+ev_data_filtered <- na.omit(ev_data) # FIltered data with NA values removed
+
+# Checking for duplicates:
+duplicates <- duplicated(ev_data_filtered) # Check for duplicates
+num_duplicates <- sum(duplicates) # Count of duplicates
+print(num_duplicates)
+
+#For Electric.Range:
+Q1 <- quantile(ev_data_filtered$Electric.Range , 0.25, na.rm = TRUE) # First Quartile
+Q3 <- quantile(ev_data_filtered$Electric.Range , 0.75, na.rm = TRUE) # Third Quartile
+IQR <- Q3 - Q1 # Compute Interquartile Range
+lower_bound <- Q1 - 1.5 * IQR # Compute Lower Bound based on IQR
+upper_bound <- Q3 + 1.5 * IQR # Compute Upper Bound based on IQR
+
+# Filter out outliers:
+ev_data_Filtered_2 <- ev_data_filtered[ev_data_filtered$Electric.Range > lower_bound & ev_data_filtered$Electric.Range < upper_bound, ]
+

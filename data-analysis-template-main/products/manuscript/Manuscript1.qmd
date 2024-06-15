@@ -1,0 +1,263 @@
+---
+title: "Example Manuscript Template for a Data Analysis Project"
+subtitle: ""
+author: Sri Lakshmi Chundru, Collin Real, Joaquin Ramirez, Seth Harris
+date: "`r Sys.Date()`"
+format:
+  docx:
+    toc: false
+    number-sections: true
+    highlight-style: github
+bibliography: ../../assets/dataanalysis-references.bib
+csl: ../../assets/apa.csl
+---
+
+The structure below is one possible setup for a data analysis project (including the course project). For a manuscript, adjust as needed. 
+You don't need to have exactly these sections, but the content covering those sections should be addressed.
+
+This uses MS Word as output format. [See here](https://quarto.org/docs/output-formats/ms-word.html) for more information. You can switch to other formats, like html or pdf. See [the Quarto documentation](https://quarto.org/) for other formats.
+
+
+```{r, echo=FALSE, message=FALSE}
+# load a few R packages
+library(here)
+library(knitr)
+```
+
+-   https://www.google.com/publicdata/directory
+-   https://www.data.gov/
+-   https://github.com/awesomedata/awesome-public-datasets
+-   https://registry.opendata.aws/
+-   https://www.kaggle.com/datasets
+
+
+- https://www.kaggle.com/datasets/jainaru/electric-vehicle-population
+
+
+# Summary/Abstract
+_Write a summary of your project._
+
+The dataset obtained from Kaggle provides detailed information about Battery Electric Vehicles (BEVs) and Plug-in Hybrid Electric Vehicles (PHEVs) registered through the Washington State Department of Licensing (DOL). It comprises 181,458 observations and 17 variables, encompassing key details such as Vehicle Identification Number (VIN), county, city, model year, electric range, and more.
+
+{{< pagebreak >}}
+
+
+# Introduction 
+
+
+
+
+**- (a) Briefly describe what the data is, how it was collected, where you will get (or got) it from. How many observations do you have, what was measured? Anything else important to report about the data?**
+
+The dataset obtained from Kaggle provides detailed information about Battery Electric Vehicles (BEVs) and Plug-in Hybrid Electric Vehicles (PHEVs) registered through the Washington State Department of Licensing (DOL). It comprises 181,458 observations and 17 variables, encompassing key details such as Vehicle Identification Number (VIN), county, city, model year, electric range, and more.
+
+**- (b) At this stage you are not required to already have and show the data, but if you do, even better. Then add a few lines of code which load the data and using some of the commands you learned about, provide summary descriptions of the data.**
+```{r}
+setwd('C:/Users/sri/OneDrive/Documents/GitHub/GANNI-PII-project/data-analysis-template-main/products/manuscript')
+
+data <- read.csv("Electric_Vehicle_Population_Data.csv")
+str(data)
+head(data)
+summary(data)
+colSums(is.na(data))
+```
+
+**- (c) Explain the question you want to answer using the data. What will be your outcome(s) of interest (if any)? What (if any) specific predictors will you focus on? What relations/patterns are you looking for in the data?**
+
+
+Question: What insights can be gleaned from the dataset regarding the electric vehicle landscape ?
+
+## Objectives:
+
+- Understand Geographic Distribution: Determine the distribution of electric vehicles across different counties and cities in Washington State.
+- Identify Popular Models: Identify the most commonly registered electric vehicle makes and models.
+- Analyze Electric Range: Investigate the distribution of electric range among registered electric vehicles.-
+- Explore Clean Alternative Fuel Vehicle Eligibility: Examine the eligibility for clean alternative fuel vehicle incentives among different vehicle types.
+
+
+## Outcomes of Interest
+- Geographic Distribution: The distribution of electric vehicles across counties and cities in Washington State.
+- Popular Models: The most frequently registered electric vehicle makes and models.
+- Electric Range Analysis: The range distribution and average electric range of registered electric vehicles.
+- Clean Alternative Fuel Vehicle Eligibility: The proportion of vehicles eligible for clean alternative fuel vehicle incentives.
+
+
+## Predictors
+- Geographic Variables: County, City, Postal Code.
+- Vehicle Attributes: Model Year, Make, Model, Electric Vehicle Type, Electric Range.
+
+
+
+## Relations/Patterns
+- Geographic Distribution: Analyzing clusters of electric vehicles in specific regions.
+- Popular Models: Identifying dominant electric vehicle makes and models.
+- Electric Range Analysis: Understanding the distribution of electric ranges and potential implications for consumer preferences.
+- Clean Alternative Fuel Vehicle Eligibility: Examining eligibility patterns and potential factors influencing eligibility.
+- Correlations: Investigating any associations between electric vehicle characteristics and legislative districts or census tracts, which may offer insights into policy implications and consumer behavior.
+
+
+
+
+**(d) As much as you know, suggest how you will analyze it. At this stage in the course, we haven’t covered analysis approaches yet, so you can keep things vague and non-technical here.**
+
+
+- Descriptive Analysis: Summarize the dataset to understand its contents, including summary statistics and frequency tables.
+
+-Visualization: Use plots and charts to visualize aspects like geographic distribution, electric range, and vehicle types.
+
+- Comparative Analysis: Compare different groups within the dataset, such as BEVs vs PHEVs or eligibility for incentives by vehicle type.
+
+- Correlation Analysis: Explore potential relationships between variables, such as electric range and base MSRP.
+
+- Geospatial Analysis (optional): Use R packages to analyze spatial patterns in the data.
+
+- Exploratory Data Analysis (EDA): Engage in exploratory analysis to identify interesting patterns or trends.
+
+
+
+**(e) You are allowed, but not yet required, to provide background information for the question you plan to answer. For instance you can describe why it’s an interesting question, who else has done similar analyses, how your analysis will be new/different, etc. Similar to what you read in an introduction to a research paper. For the final report, you’ll need these parts. For part 1, they are not required, but you are welcome to already write down some of that. **
+
+
+
+## Primary Research Question: What insights can be gleaned from the dataset regarding the electric vehicle landscape in Washington State?
+
+Sub-questions:
+
+-  How are electric vehicles distributed across different counties, cities, and States?
+-  Which EV makes and models are most popular?
+-  What is the range of electric vehicles in terms of electric range and base MSRP?
+-  How does eligibility for clean alternative fuel vehicle incentives vary among different vehicle types?
+-  Are there any significant correlations between EV characteristics and geographic or legislative factors?
+
+
+
+**(d) Eventually, for your final report, what you write for this part will go into different sections of the full report. Some will go into the introduction, some in the methods section. You can already place these items there, or for now just write them as a single section.**
+
+  
+
+
+**Introduction**
+Electric vehicles (EVs), including Battery Electric Vehicles (BEVs) and Plug-in Hybrid Electric Vehicles (PHEVs), are crucial in the global effort to reduce greenhouse gas emissions and dependence on fossil fuels. This dataset, sourced from the Washington State Department of Licensing (DOL) and obtained from Kaggle, provides a comprehensive overview of registered electric vehicles in Washington State. Analyzing this data offers valuable insights into the adoption patterns and characteristics of EVs, informing policies and infrastructure development to further promote sustainable transportation.
+
+
+
+**Objectives:**
+
+**Geographic Distribution:** Determine the distribution of electric vehicles across different counties and cities.
+**Popular Models:** Identify the most commonly registered EV makes and models.
+**Electric Range Analysis:** Investigate the distribution of electric range among registered EVs.
+**CAFV Eligibility:** Examine the eligibility for clean alternative fuel vehicle incentives among different vehicle types.
+**Correlation Analysis:** Explore potential correlations between EV characteristics and geographic or legislative factors.
+
+
+**Methods**
+
+
+**Data Cleaning and Preparation:**
+
+- Address missing values and ensure correct data types.
+- Transform variables as necessary for analysis.
+
+To ensure the dataset is ready for analysis, the following steps were undertaken:
+
+**1. Data Import and Initial Inspection:**
+
+- The dataset Electric_Vehicle_Population_Data.csv was imported.
+- Summary statistics and data types were displayed to understand the initial structure and content of the data.
+
+**2. Checking for Duplicates:**
+
+- Identified and counted the number of duplicate rows in the dataset to avoid redundant information.
+- Result: num_duplicates duplicates were found.
+
+**3. Counting Rows with Zero MSRP:**
+
+- Counted the number of rows where the Base.MSRP (Manufacturer's Suggested Retail Price) is zero to identify incomplete pricing data.
+- Result: count_zero_msrp rows with zero MSRP were identified.
+
+**4. Checking for Null Values:**
+
+- Calculated the total number of null (NA) values in the dataset to address missing data.
+- Result: total_na null values were found.
+
+**5. Removing Null Values and Identifying Outliers:**
+
+- Filtered out rows with null values to ensure data completeness.
+- Identified the maximum Base.MSRP for each electric vehicle type to spot potential outliers.
+- Result:The maximum MSRP for each vehicle type was summarized.
+
+**6. Filtering Out Outliers and Zero MSRP:**
+
+Removed the row with an extreme outlier Base.MSRP of 845,000 to prevent distortion in the analysis.
+Also filtered out rows where Base.MSRP is zero to ensure only valid pricing data is considered.
+By performing these steps, the dataset was cleaned and prepared, ensuring it is more accurate and reliable for subsequent analysis.
+
+
+**Descriptive Statistics:**
+
+- Compute summary statistics (mean, median, mode, standard deviation) for numerical variables.
+- Generate frequency tables for categorical variables.
+
+**Boxplot - Price Distribution vs. Electric Vehicle Type:**
+
+This boxplot compares the price distribution of Battery Electric Vehicles (BEV) and Plug-in Hybrid Electric Vehicles (PHEV).
+It shows that BEVs have a wider price range with a higher median price compared to PHEVs, which have a more compact price distribution with some outliers.
+
+**Boxplot - Price Distribution vs. Electric Vehicle Type (Clean Alternative Fuel Vehicle Eligible):**
+
+This boxplot illustrates the price distribution based on eligibility for Clean Alternative Fuel Vehicle incentives.
+Vehicles eligible for the incentive tend to have a higher price range compared to those that are not eligible due to low battery range.
+
+**Boxplot - Price Distribution vs. Electric Vehicle Type (Drive Range):**
+
+This boxplot shows the distribution of drive range for clean alternative fuel vehicle eligible and non-eligible vehicles.
+Eligible vehicles have a wider and higher range compared to non-eligible vehicles, which have a limited drive range.
+
+**Scatterplot - Electric Vehicle Range Growth over Time:**
+
+This scatterplot depicts the growth in electric vehicle range over time.
+There is a clear trend showing that the electric range of vehicles has generally increased over the years.
+
+**Boxplot - Price Distribution by Brand:**
+
+This boxplot compares the price distribution of electric vehicles by different brands.
+Tesla has the highest price range, followed by Porsche. Brands like KIA and Chrysler have lower price distributions.
+
+**Scatterplot - Price vs. Range Correlation:**
+
+This scatterplot shows the correlation between the vehicle price and its electric range.
+There is a positive correlation where higher-priced vehicles tend to have a longer electric range.
+These plots provide insights into the price and range variations of electric vehicles based on type, eligibility for incentives, brand, and over time.
+
+**Data Visualization:**
+
+- Create bar charts, histograms, and pie charts to visualize distributions.
+- Use scatter plots and box plots to explore relationships between variables.
+- Generate geographic maps to visualize EV distribution across the state.
+
+**Comparative Analysis:**
+
+- Compare BEVs and PHEVs in terms of electric range and base MSRP.
+- Analyze differences in CAFV eligibility across makes and models.
+
+**Correlation Analysis:**
+
+- Calculate correlation coefficients for numerical variables.
+- Use cross-tabulations to explore relationships between categorical and numerical variables.
+
+**Geospatial Analysis (if applicable):**
+
+- Use geographic mapping tools to identify clusters or patterns in vehicle registrations.
+
+**Exploratory Data Analysis (EDA):**
+
+-Perform in-depth analysis to identify trends, patterns, or outliers.
+-Use advanced visualization techniques for deeper insights.
+
+**Conclusion:**
+
+By analyzing the electric vehicle registration data for Washington State, this project aims to uncover significant patterns and trends that can inform policy decisions and infrastructure planning. The insights gained from this analysis will contribute to the broader understanding of EV adoption and support the transition towards a more sustainable transportation future.
+
+{{< pagebreak >}}
+
+

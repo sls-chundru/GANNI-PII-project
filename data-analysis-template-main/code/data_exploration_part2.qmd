@@ -1,0 +1,151 @@
+
+```{r}
+library(readxl) #for loading Excel files
+library(readr)
+library(dplyr) #for data processing/cleaning
+library(tidyr) #for data processing/cleaning
+library(skimr) #for nice visualization of data 
+library(here) #to set paths
+library(tidyverse)
+library(ggplot2)
+library(tidycensus)
+```
+
+
+```{r}
+getwd()
+```
+
+```{r}
+# Import Data, Check Descriptive Statistics & Data Types
+data_location <- here::here("starter-analysis-exercise","code","final_project","Electric_Vehicle_Population_Data.csv")
+ev_data <- read.csv(data_location)
+summary(ev_data)
+dplyr::glimpse(ev_data)
+```
+
+```{r}
+# Checking for duplicates:
+duplicates <- duplicated(ev_data) # Check for duplicates
+num_duplicates <- sum(duplicates) # Count of duplicates
+print(num_duplicates)
+```
+
+```{r}
+# Find total rows with MSRP prices
+count_zero_msrp = length(which(ev_data$Base.MSRP == 0))
+total_rows_count = nrow(ev_data)
+total_price_data_points = total_rows_count - count_zero_msrp
+print(paste0('Total rows: ', total_rows_count))
+print(paste0('Total Missing MSRP Prices: ', count_zero_msrp))
+print(paste0('Total Price Data Points: ', total_price_data_points))
+```
+
+
+```{r}
+# Checking for Null values:
+total_na <- sum(is.na(ev_data))
+print(total_na)
+```
+
+```{r}
+# Removing null values and outlier from MSRP:
+ev_data_filtered <- na.omit(ev_data) # FIltered data with NA values removed
+max_msrp_outlier <- ev_data_filtered %>%
+  group_by(Electric.Vehicle.Type) %>%
+  summarise(max = max(Base.MSRP)) 
+max_msrp_outlier
+filter_msrp_outlier <- ev_data_filtered %>%
+  filter(Base.MSRP != 845000) %>%
+  filter(Base.MSRP != 0)
+filter_msrp_outlier
+```
+
+```{r}
+# Create a boxplot of price distribution by electric vehicle type
+p2_boxplot<-ggplot(filter_msrp_outlier, aes(x = Electric.Vehicle.Type, y = Base.MSRP)) +
+  geom_boxplot() +
+  labs(title = "Boxplot - Price Distribution vs. Electric Vehicle Type",
+       x = "Electric Vehicle Type",
+       y = "MSRP")
+p2_boxplot 
+```
+
+```{r}
+# Clean data for plot
+price_by_state = ev_data_filtered %>% 
+  group_by(Clean.Alternative.Fuel.Vehicle..CAFV..Eligibility) %>%
+  filter(Base.MSRP != 0) %>%
+  filter(Base.MSRP != 845000)
+
+# Create a boxplot for price distribution by alternative fuel eligibility
+p3_boxplot<-ggplot(price_by_state, aes(x = Clean.Alternative.Fuel.Vehicle..CAFV..Eligibility, y = Base.MSRP)) +
+  geom_boxplot() +
+  labs(title = "Boxplot - Price Distribution vs. Alt. Vehicle Eligibility",
+       x = "Electric Vehicle Type",
+       y = "MSRP")
+p3_boxplot 
+```
+
+```{r}
+# Clean data from plot
+price_by_state = ev_data_filtered %>% 
+  group_by(Clean.Alternative.Fuel.Vehicle..CAFV..Eligibility) %>%
+  filter(Electric.Range != 0) 
+
+# Create a boxplot
+p4_boxplot<-ggplot(price_by_state, aes(x = Clean.Alternative.Fuel.Vehicle..CAFV..Eligibility, y = Electric.Range)) +
+  geom_boxplot() +
+  labs(title = "Boxplot - Price Distribution vs. Electric Vehicle Type")
+p4_boxplot 
+```
+```{r}
+# Create a boxplot with the new categorical variable on the x-axis and height on the y-axis
+p_boxplot<-ggplot(filter_msrp_outlier, aes(x = Make, y = Base.MSRP)) +
+  geom_boxplot() +
+  labs(title = "Boxplot - Price Distribution by Brand",
+       x = "Brand",
+       y = "Price")
+p_boxplot
+```
+``` {r}
+# Create a scatterplot with electric vehicle range growth over time
+
+p_scatterplot<-ggplot(ev_data_filtered, aes(x = Model.Year, y = Electric.Range)) +
+  geom_point() +
+  labs(title = "Scatterplot - Electric Vehicle Range Growth over Time",
+       x = "Year",
+       y = "Electric Range")
+plot(p_scatterplot)
+# Save the scatterplot to a file
+# ggsave("scatterplot.png", plot = p_scatterplot)
+```
+
+
+``` {r}
+# Create a scatterplot - price vs. electric vehicle range correlation
+
+p_scatterplot<-ggplot(filter_msrp_outlier, aes(x = Electric.Range, y = Base.MSRP)) +
+  geom_point() +
+  labs(title = "Scatterplot - Price vs. Range Correlation",
+       x = "Vehicle Range",
+       y = "MSRP")
+plot(p_scatterplot)
+```
+
+```{r}
+#For Electric.Range:
+Q1 <- quantile(ev_data_filtered$Electric.Range , 0.25, na.rm = TRUE) # First Quartile
+Q3 <- quantile(ev_data_filtered$Electric.Range , 0.75, na.rm = TRUE) # Third Quartile
+IQR <- Q3 - Q1 # Compute Interquartile Range
+lower_bound <- Q1 - 1.5 * IQR # Compute Lower Bound based on IQR
+upper_bound <- Q3 + 1.5 * IQR # Compute Upper Bound based on IQR
+upper_bound
+```
+
+
+```{r}
+# Filter out outliers:
+ev_data_Filtered_2 <- ev_data_filtered[ev_data_filtered$Electric.Range > lower_bound & ev_data_filtered$Electric.Range < upper_bound, ]
+ev_data_Filtered_2
+```

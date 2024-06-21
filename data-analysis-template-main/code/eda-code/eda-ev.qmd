@@ -1,0 +1,610 @@
+---
+title: "EV Exploratory Data Analysis"
+date: today
+output: html_document
+execute: 
+  error: False
+  warning: False
+---
+
+# Setup
+
+```{python}
+#load needed packages. make sure they are installed.
+from pandas import read_csv, set_option, merge, DataFrame, concat
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.metrics import accuracy_score
+import statsmodels.api as sm
+import statsmodels
+from statsmodels.graphics.gofplots import ProbPlot
+from scipy import stats
+set_option('display.max_columns', None)
+```
+
+
+Load the data.
+
+```{python}
+base_dir = '../../'
+df = read_csv(base_dir + 'data/processed-data/brand_model_year_tax_data.csv')
+columns_list = df.columns.tolist()
+for i in columns_list:
+    print(i.strip())
+numeric_cols = columns_list[28:]
+df.columns.tolist()
+```
+
+Vehicle Brand Aggregation
+```{python}
+sns.set_style('darkgrid')
+zip_code_count = df.groupby(['ZIPCODE', 'Electric Vehicle Type']).agg({
+    'Vehicle Count': 'sum',
+}).reset_index()
+fig, axes = plt.subplots(2, 1, figsize=(15,15))
+sns.histplot(ax=axes[0], data=zip_code_count, y=zip_code_count['Vehicle Count'])
+log_zip_code_count = zip_code_count.copy()
+log_zip_code_count['Vehicle Count'] = np.log(zip_code_count['Vehicle Count'])
+sns.histplot(ax=axes[1], data=log_zip_code_count, y=log_zip_code_count['Vehicle Count'])
+```
+
+
+```{python}
+fig, axes = plt.subplots(2, 1, figsize=(15,15))
+sns.boxplot(ax=axes[0], data=zip_code_count, x=zip_code_count['Vehicle Count'])
+log_zip_code_count = zip_code_count.copy()
+log_zip_code_count['Vehicle Count'] = np.log(zip_code_count['Vehicle Count'])
+sns.boxplot(ax=axes[1], data=log_zip_code_count, x=log_zip_code_count['Vehicle Count'])
+```
+
+MAKE AND ELECTRIC VEHICLE TYPE
+```{python}
+sns.set_style('darkgrid')
+make_ev_type = df.groupby(['Make', 'Electric Vehicle Type']).agg({
+    'Vehicle Count': 'sum',
+}).reset_index()
+fig, axes = plt.subplots(2, 1, figsize=(15,15))
+sns.histplot(ax=axes[0], data=make_ev_type, y=make_ev_type['Vehicle Count'])
+log_make_ev_type = make_ev_type.copy()
+log_make_ev_type['Vehicle Count'] = np.log(make_ev_type['Vehicle Count'])
+sns.histplot(ax=axes[1], data=log_make_ev_type, y=log_make_ev_type['Vehicle Count'])
+```
+
+```{python}
+fig, axes = plt.subplots(2, 1, figsize=(15,15))
+sns.boxplot(ax=axes[0], data=make_ev_type, x=make_ev_type['Electric Vehicle Type'], y=make_ev_type['Vehicle Count'])
+log_make_ev_type = make_ev_type.copy()
+log_make_ev_type['Vehicle Count'] = np.log(make_ev_type['Vehicle Count'])
+sns.boxplot(ax=axes[1], data=log_make_ev_type, x=make_ev_type['Electric Vehicle Type'], y=log_make_ev_type['Vehicle Count'])
+```
+
+MAKE AND Clean Alt Fuel
+```{python}
+sns.set_style('darkgrid')
+make_ev_type = df.groupby(['Make', 'Clean Alternative Fuel Vehicle (CAFV) Eligibility']).agg({
+    'Vehicle Count': 'sum',
+}).reset_index()
+fig, axes = plt.subplots(2, 1, figsize=(15,15))
+sns.histplot(ax=axes[0], data=make_ev_type, y=make_ev_type['Vehicle Count'])
+log_make_ev_type = make_ev_type.copy()
+log_make_ev_type['Vehicle Count'] = np.log(make_ev_type['Vehicle Count'])
+sns.histplot(ax=axes[1], data=log_make_ev_type, y=log_make_ev_type['Vehicle Count'])
+```
+
+```{python}
+fig, axes = plt.subplots(2, 1, figsize=(15,15))
+sns.boxplot(ax=axes[0], data=make_ev_type, x=make_ev_type['Clean Alternative Fuel Vehicle (CAFV) Eligibility'], y=make_ev_type['Vehicle Count'])
+log_make_ev_type = make_ev_type.copy()
+log_make_ev_type['Vehicle Count'] = np.log(make_ev_type['Vehicle Count'])
+sns.boxplot(ax=axes[1], data=log_make_ev_type, x=make_ev_type['Clean Alternative Fuel Vehicle (CAFV) Eligibility'], y=log_make_ev_type['Vehicle Count'])
+```
+
+
+Mean 
+```{python}
+brand_df = df[[
+ 'Residential energy tax credit amount', 'Total income amount', 'Vehicle Count'
+]]
+
+fig, axes = plt.subplots(1, 1, figsize=(15,15))
+sns.heatmap(data=brand_df)
+brand_df.corr()
+# brand_df['Electric Range'] = np.log(brand_df['Electric Range'])
+# sns.boxplot(ax=axes[1], data=brand_df, y=brand_df['Electric Range'])
+```
+
+
+```{python}
+new_brand_df  = df.groupby(['ZIPCODE']).agg({
+    'Total income amount': 'sum',
+    'Electric Range': 'count'
+}).reset_index(drop=True).rename(columns={
+    'Electric Range': 'Vehicle Count'
+})
+fig, axes = plt.subplots(2, 1, figsize=(15,15))
+new_brand_df['Total income amount'] = new_brand_df['Total income amount'].astype(int)
+slope, intercept, r_value, p_value, std_err = stats.linregress(new_brand_df['Total income amount'],new_brand_df['Vehicle Count'])
+sns.regplot(ax=axes[0], data=new_brand_df, y='Vehicle Count', x='Total income amount', 
+    ci=None, 
+    label=f"y={0:.1f}x+{1:.1f}\nr-sq: {r_value.round(3)}".format(slope, intercept)).legend(loc="best")
+new_brand_df['Vehicle Count'] = np.log(new_brand_df['Vehicle Count'])
+new_brand_df['Total income amount'] = np.log(new_brand_df['Total income amount'])
+slope, intercept, r_value, p_value, std_err = stats.linregress(new_brand_df['Total income amount'],new_brand_df['Vehicle Count'])
+sns.regplot(ax=axes[1],
+    data=new_brand_df,
+    x='Total income amount',
+    y='Vehicle Count', 
+    ci=None, 
+    label=f"y={0:.1f}x+{1:.1f}\nr-sq: {r_value.round(3)}".format(slope, intercept)).legend(loc="best")
+
+```
+
+```{python}
+base_dir = '../../'
+df = read_csv(base_dir + 'data/processed-data/brand_model_year_tax_data.csv')
+columns_list = df.columns.tolist()
+for i in columns_list:
+    print(i.strip())
+# numeric_cols = columns_list[28:]
+# df.columns.tolist()
+```
+
+ZIP CODE ONLY
+```{python}
+amount_brand_df = df.groupby(['ZIPCODE', 'Electric Vehicle Type'])[numeric_cols].mean(numeric_only=True).reset_index()
+brand_df = df.groupby(['ZIPCODE', 'Electric Vehicle Type']).agg({
+    'Vehicle Count': 'sum',
+    'Electric Range': 'mean'
+}).reset_index()
+merged_df = merge(brand_df, amount_brand_df, on=['ZIPCODE', 'Electric Vehicle Type'])
+label_encoder = LabelEncoder()
+label_encoder.fit(merged_df['Electric Vehicle Type'])
+encoded_labels = label_encoder.transform(merged_df['Electric Vehicle Type'])
+merged_df['Electric Vehicle Type'] = encoded_labels
+# print(merged_df['Vehicle Count'].sort_values(ascending=True).unique().tolist())
+merged_df = merged_df.sort_values('Vehicle Count', ascending=False)
+print(merged_df)
+
+# merged_df['Vehicle Count'] = np.log(merged_df['Vehicle Count'])
+# merged_df = merged_df.loc[(merged_df['Vehicle Count'] < 5.0)]
+merged_df = merged_df.loc[(merged_df['Vehicle Count'] != 5.187386) & (merged_df['ZIPCODE'] != 98134.0)]
+X_df = merged_df
+Y_df = merged_df[['Vehicle Count']]
+
+Y_df = np.log(Y_df)
+X_df = merged_df.drop(['Vehicle Count', 'Electric Range', 'ZIPCODE'], axis=1)
+
+X = np.array(X_df)
+x = sm.add_constant(X)
+Y = np.array(Y_df)
+X_train, X_test, y_train, y_test = train_test_split(x,Y, 
+                                   random_state=104,  
+                                   test_size=0.2,
+                                   shuffle=True) 
+print(X_train.shape)
+print(y_train.shape)
+model = sm.OLS(y_train, X_train)
+results = model.fit()
+results.summary()
+
+p_values = results.pvalues
+p_df = DataFrame()
+p_df['Feature'] = X_df.columns
+p_df['p-value'] = results.pvalues[1:]
+feat_list = []
+p_val_list = []
+for idx, row in p_df.iterrows():
+    if row['p-value'] < .05:
+        feat_list.append(row['Feature'])
+        p_val_list.append(row['p-value'])
+    else:
+        continue
+new_p_df = DataFrame()
+new_p_df['Feature'] = feat_list
+new_p_df['p-value'] = p_val_list
+X = np.array(X_df[new_p_df['Feature']])
+Y = np.array(Y_df)
+x = sm.add_constant(X)
+
+X_train, X_test, y_train, y_test = train_test_split(x,Y, 
+                                   random_state=104,  
+                                   test_size=0.2,
+                                   shuffle=True) 
+model2 = sm.OLS(y_train, X_train)
+results2 = model2.fit()
+results2.summary()
+
+p3_values = results2.pvalues
+new3 = DataFrame()
+new3['Feature'] = new_p_df['Feature']
+new3['p-value'] = p3_values[1:]
+new3
+feat_list3 = []
+p_val_list3 = []
+for idx, row in new3.iterrows():
+    if row['p-value'] < .05:
+        feat_list3.append(row['Feature'])
+        p_val_list3.append(row['p-value'])
+    else:
+        continue
+final3_df = DataFrame()
+final3_df['Feature'] = feat_list3
+final3_df['p-value'] = p_val_list3
+final3_df
+X = np.array(X_df[final3_df['Feature']])
+Y = np.array(Y_df)
+x = sm.add_constant(X)
+
+X_train, X_test, y_train, y_test = train_test_split(x,Y, 
+                                   random_state=104,  
+                                   test_size=0.2,
+                                   shuffle=True) 
+
+model3 = sm.OLS(y_train, X_train)
+results3 = model3.fit()
+Y_pred = results3.predict(X_train).astype(int)
+
+
+features = ['constant'] + final3_df['Feature'].tolist()
+X = DataFrame(X_train, columns=features)
+Y = DataFrame(y_train, columns=['Vehicle Count'])
+dataframe = concat([X, Y], axis=1)
+dataframe
+# results3.summary()
+features
+```
+
+```{python}
+
+# model values
+model_fitted_y = results3.fittedvalues
+
+# model residuals
+model_residuals = results3.resid
+
+# normalized residuals
+model_norm_residuals = results3.get_influence().resid_studentized_internal
+
+# absolute squared normalized residuals
+model_norm_residuals_abs_sqrt = np.sqrt(np.abs(model_norm_residuals))
+
+# absolute residuals
+model_abs_resid = np.abs(model_residuals)
+
+# leverage, from statsmodels internals
+model_leverage = results3.get_influence().hat_matrix_diag
+
+# cook's distance, from statsmodels internals
+model_cooks = results3.get_influence().cooks_distance[0]
+
+plot_lm_1 = plt.figure()
+plot_lm_1.axes[0] = sns.residplot(x=model_fitted_y, y=dataframe.columns[-1], data=dataframe,
+                          lowess=True,
+                          scatter_kws={'alpha': 0.5},
+                          line_kws={'color': 'red', 'lw': 1, 'alpha': 0.8})
+
+plot_lm_1.axes[0].set_title('Residuals vs Fitted')
+plot_lm_1.axes[0].set_xlabel('Fitted values')
+plot_lm_1.axes[0].set_ylabel('Residuals')
+df = DataFrame()
+df['res'] = model_residuals
+df['fitted'] = model_fitted_y
+df['count'] = dataframe['Vehicle Count']
+# df['ZIPCODE'] = dataframe['ZIPCODE']
+maxr = np.max(model_residuals)
+df.sort_values('fitted', ascending=False)
+```
+
+#### Normal Q-Q Plot
+This plot shows if the residuals are normally distributed. A good normal QQ plot has all of the residuals lying on or close to the red line.
+
+```{python}
+QQ = ProbPlot(model_norm_residuals)
+plot_lm_2 = QQ.qqplot(line='45', alpha=0.5, color='#4C72B0', lw=1)
+plot_lm_2.axes[0].set_title('Normal Q-Q')
+plot_lm_2.axes[0].set_xlabel('Theoretical Quantiles')
+plot_lm_2.axes[0].set_ylabel('Standardized Residuals')
+
+# annotations
+abs_norm_resid = np.flip(np.argsort(np.abs(model_norm_residuals)), 0)
+abs_norm_resid_top_3 = abs_norm_resid[:3]
+for r, i in enumerate(abs_norm_resid_top_3):
+    plot_lm_2.axes[0].annotate(i,
+                               xy=(np.flip(QQ.theoretical_quantiles, 0)[r],
+                                   model_norm_residuals[i]))
+```
+
+#### Scale-Location
+This plot is a way to check if the residuals suffer from non-constant variance, aka heteroscedasticity.
+
+```{python}
+plot_lm_3 = plt.figure()
+plt.scatter(model_fitted_y, model_norm_residuals_abs_sqrt, alpha=0.5)
+sns.regplot(
+    x=model_fitted_y, 
+    y=model_norm_residuals_abs_sqrt,
+    scatter=False,
+    ci=False,
+    lowess=True,
+    line_kws={'color': 'red', 'lw': 1, 'alpha': 0.8})
+plot_lm_3.axes[0].set_title('Scale-Location')
+plot_lm_3.axes[0].set_xlabel('Fitted values')
+plot_lm_3.axes[0].set_ylabel('$\sqrt{|Standardized Residuals|}$')
+
+# annotations
+abs_sq_norm_resid = np.flip(np.argsort(model_norm_residuals_abs_sqrt), 0)
+abs_sq_norm_resid_top_3 = abs_sq_norm_resid[:3]
+for r, i in enumerate(abs_sq_norm_resid_top_3):
+    plot_lm_3.axes[0].annotate(
+        i,
+        xy=(model_fitted_y[i],
+        model_norm_residuals_abs_sqrt[i]))
+```
+
+#### Residuals vs. Leverage
+Unlike outliers, which have an unusually large y value, leverage points have extreme x values. This may not seem so bad at face value, but it can have damaging effects on the model because the β coefficients are very sensitive to leverage points. The purpose of the Residuals vs Leverage plot is to identify these problematic observations.
+
+```{python}
+plot_lm_4 = plt.figure()
+plt.scatter(model_leverage, model_norm_residuals, alpha=0.5)
+sns.regplot(x=model_leverage, y=model_norm_residuals,
+            scatter=False,
+            ci=False,
+            lowess=True,
+            line_kws={'color': 'red', 'lw': 1, 'alpha': 0.8})
+plot_lm_4.axes[0].set_xlim(0, np.max(model_leverage)+0.01)
+plot_lm_4.axes[0].set_ylim(-3, 5)
+plot_lm_4.axes[0].set_title('Residuals vs Leverage')
+plot_lm_4.axes[0].set_xlabel('Leverage')
+plot_lm_4.axes[0].set_ylabel('Standardized Residuals')
+
+# annotations
+leverage_top_3 = np.flip(np.argsort(model_cooks), 0)[:3]
+for i in leverage_top_3:
+    plot_lm_4.axes[0].annotate(i,
+                                xy=(model_leverage[i],
+                                    model_norm_residuals[i]))
+```
+
+
+```{python}
+def cookdplot(model, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots()
+    
+    cooks_d = model.get_influence().cooks_distance[0]
+            
+    ax.vlines(range(len(cooks_d)),0,cooks_d)
+
+    # annotations
+    cookd_top_3 = np.flip(np.argsort(cooks_d), 0)[:3]
+    for i in cookd_top_3:
+        ax.annotate(i, xy=(i, cooks_d[i]),color = 'C3')
+        
+    ax.set_title("Cook's Distance" , fontweight="bold")
+    ax.set_xlabel('Obs. Number')
+    ax.set_ylabel("Cook's distance")
+    return ax
+
+cookdplot(results3)
+plt.show()
+```
+
+### SECOND MODEL
+```{python}
+# merged_df = merged_df.loc[(merged_df['Vehicle Count'] != 1.94591)]
+# print(merged_df.loc[merged_df['Vehicle Count'] < 5].sort_values('Vehicle Count', ascending=False).head(30))
+X_df = merged_df.copy()
+# Y_df = merged_df[['Vehicle Count']]
+# Y_df = np.log(Y_df['Vehicle Count'])
+
+X_features = [
+ 'Electric Vehicle Type',
+ 'Adjust gross income (AGI) [8]',
+ 'Total income amount',
+#  'State and local income tax refunds amount',
+ 'Taxable pensions and annuities amount',
+ 'Number of farm returns',
+ 'Total statutory adjustments amount',
+#  'Self-employed (Keogh) retirement plans amount',
+ 'Total standard deduction amount',
+ 'Basic standard deduction amount',
+ 'Additional standard deduction amount',
+#  'Total medical and dental expense deduction amount',
+ 'Limited state and local taxes',
+ 'Home mortgage from personal seller amount',
+ 'Alternative minimum tax amount',
+ 'Child and dependent care credit amount',
+ 'Net premium tax credit amount',
+#  'Qualified sick and family leave credit for leave taken before April 1, 2021 amount',
+#  'Credited to next year’s estimated tax amount'
+ ]
+X_df = X_df[X_features]
+feat_list = []
+log_list = []
+for feat in X_features:
+    feat_list.append(feat)
+    log_list.append(np.log(X_df[feat]))
+
+
+
+# X_features = ['ZIPCODE',
+#  'Adjust gross income (AGI) [8]',
+#  'Total income amount',
+#  'Total statutory adjustments amount',
+#  'Home mortgage from personal seller amount',
+#  'Alternative minimum tax amount']
+
+X = X_df[X_features]
+
+Y = Y_df
+x = sm.add_constant(X)
+
+X_train, X_test, y_train, y_test = train_test_split(x,Y, 
+                                   random_state=104,  
+                                   test_size=0.2,
+                                   shuffle=True) 
+
+print(X_train)
+model = sm.OLS(y_train, X_train)
+results2mod = model.fit()
+# Y_pred = results2mod.predict(X_test).astype(int)
+results2mod.summary()
+# model1 = LinearRegression().fit(X_train, y_train)
+# model1.score(X_train, y_train)
+# model1.score(X_test, y_test)
+# results2mod.summary()
+
+X = DataFrame(X_train, columns=['constant'] + X_features)
+Y = DataFrame(y_train, columns=['Vehicle Count'])
+dataframe = concat([X, Y], axis=1)
+# dataframe
+results2mod.summary()
+# model.coef_
+# model.intercept_
+# Y_pred = model.predict(X_test)
+# plt.scatter(x=y_test, y=Y_pred)
+# plt.plot(y_test, Y_pred, color='red')    
+# sns.regplot(x=y_test, y=Y_pred)
+```
+
+
+```{python}
+_# model values
+model_fitted_y = results2mod.fittedvalues
+
+# model residuals
+model_residuals = results2mod.resid
+
+# normalized residuals
+model_norm_residuals = results2mod.get_influence().resid_studentized_internal
+
+# absolute squared normalized residuals
+model_norm_residuals_abs_sqrt = np.sqrt(np.abs(model_norm_residuals))
+
+# absolute residuals
+model_abs_resid = np.abs(model_residuals)
+
+# leverage, from statsmodels internals
+model_leverage = results2mod.get_influence().hat_matrix_diag
+print(model_leverage)
+
+# cook's distance, from statsmodels internals
+model_cooks = results2mod.get_influence().cooks_distance[0]
+
+plot_lm_1 = plt.figure()
+plot_lm_1.axes[0] = sns.residplot(x=model_fitted_y, y=dataframe.columns[-1], data=dataframe,
+                          lowess=True,
+                          scatter_kws={'alpha': 0.5},
+                          line_kws={'color': 'red', 'lw': 1, 'alpha': 0.8})
+
+plot_lm_1.axes[0].set_title('Residuals vs Fitted')
+plot_lm_1.axes[0].set_xlabel('Fitted values')
+plot_lm_1.axes[0].set_ylabel('Residuals')
+df = DataFrame()
+df['res'] = model_residuals
+df['fitted'] = model_fitted_y
+df['count'] = dataframe['Vehicle Count']
+df['index'] = df.index
+maxr = np.max(model_residuals)
+df.sort_values('res', ascending=True)
+```
+
+#### Normal Q-Q Plot
+This plot shows if the residuals are normally distributed. A good normal QQ plot has all of the residuals lying on or close to the red line.
+
+```{python}
+QQ = ProbPlot(model_norm_residuals)
+plot_lm_2 = QQ.qqplot(line='45', alpha=0.5, color='#4C72B0', lw=1)
+plot_lm_2.axes[0].set_title('Normal Q-Q')
+plot_lm_2.axes[0].set_xlabel('Theoretical Quantiles')
+plot_lm_2.axes[0].set_ylabel('Standardized Residuals')
+
+# annotations
+abs_norm_resid = np.flip(np.argsort(np.abs(model_norm_residuals)), 0)
+abs_norm_resid_top_3 = abs_norm_resid[:3]
+for r, i in enumerate(abs_norm_resid_top_3):
+    plot_lm_2.axes[0].annotate(i,
+                               xy=(np.flip(QQ.theoretical_quantiles, 0)[r],
+                                   model_norm_residuals[i]))
+```
+
+#### Scale-Location
+This plot is a way to check if the residuals suffer from non-constant variance, aka heteroscedasticity.
+
+```{python}
+plot_lm_3 = plt.figure()
+plt.scatter(model_fitted_y, model_norm_residuals_abs_sqrt, alpha=0.5)
+sns.regplot(
+    x=model_fitted_y, 
+    y=model_norm_residuals_abs_sqrt,
+    scatter=False,
+    ci=False,
+    lowess=True,
+    line_kws={'color': 'red', 'lw': 1, 'alpha': 0.8})
+plot_lm_3.axes[0].set_title('Scale-Location')
+plot_lm_3.axes[0].set_xlabel('Fitted values')
+plot_lm_3.axes[0].set_ylabel('$\sqrt{|Standardized Residuals|}$')
+
+# annotations
+abs_sq_norm_resid = np.flip(np.argsort(model_norm_residuals_abs_sqrt), 0)
+abs_sq_norm_resid_top_3 = abs_sq_norm_resid[:3]
+for r, i in enumerate(abs_sq_norm_resid_top_3):
+    plot_lm_3.axes[0].annotate(
+        i,
+        xy=(model_fitted_y[i],
+        model_norm_residuals_abs_sqrt[i]))
+```
+
+#### Residuals vs. Leverage
+Unlike outliers, which have an unusually large y value, leverage points have extreme x values. This may not seem so bad at face value, but it can have damaging effects on the model because the β coefficients are very sensitive to leverage points. The purpose of the Residuals vs Leverage plot is to identify these problematic observations.
+
+```{python}
+plot_lm_4 = plt.figure()
+plt.scatter(model_leverage, model_norm_residuals, alpha=0.5)
+sns.regplot(x=model_leverage, y=model_norm_residuals,
+            scatter=False,
+            ci=False,
+            lowess=True,
+            line_kws={'color': 'red', 'lw': 1, 'alpha': 0.8})
+plot_lm_4.axes[0].set_xlim(0, np.max(model_leverage)+0.01)
+plot_lm_4.axes[0].set_ylim(-3, 5)
+plot_lm_4.axes[0].set_title('Residuals vs Leverage')
+plot_lm_4.axes[0].set_xlabel('Leverage')
+plot_lm_4.axes[0].set_ylabel('Standardized Residuals')
+
+# annotations
+leverage_top_3 = np.flip(np.argsort(model_cooks), 0)[:3]
+for i in leverage_top_3:
+    plot_lm_4.axes[0].annotate(i,
+                                xy=(model_leverage[i],
+                                    model_norm_residuals[i]))
+```
+
+
+```{python}
+def cookdplot(model, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots()
+    
+    cooks_d = model.get_influence().cooks_distance[0]
+            
+    ax.vlines(range(len(cooks_d)),0,cooks_d)
+
+    # annotations
+    cookd_top_3 = np.flip(np.argsort(cooks_d), 0)[:3]
+    for i in cookd_top_3:
+        ax.annotate(i, xy=(i, cooks_d[i]),color = 'C3')
+        
+    ax.set_title("Cook's Distance" , fontweight="bold")
+    ax.set_xlabel('Obs. Number')
+    ax.set_ylabel("Cook's distance")
+    return ax
+
+cookdplot(results2mod)
+plt.show()
+```

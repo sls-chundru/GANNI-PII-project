@@ -1,0 +1,95 @@
+VARIABLE NAME,DESCRIPTION,VALUE/LINE REFERENCE,Type
+STATEFIPS,The State Federal Information Processing System (FIPS) code,Jan-56,  Char
+STATE,The State associated with the ZIP code,Two-digit State abbreviation code,  Char
+ZIPCODE,5-digit Zip code, ,  Char
+N1,Number of returns [3], ,Num
+MARS1,Number of single returns,  Filing status is single,Num
+MARS2,Number of joint returns,  Filing status is married filing jointly,Num
+MARS4,Number of head of household returns,  Filing status is head of household,Num
+ELF,Number of electronically filed returns,,Num
+CPREP,Number of computer prepared paper returns,,Num
+PREP,Number of returns with paid preparer's signature, ,Num
+DIR_DEP,Number of returns with direct deposit,,Num
+VRTCRIND,Number of returns with virtual currency indicator,,Num
+N2,Number of individuals [4],  ,Num
+TOTAL_VITA,Total number of volunteer prepared returns [5],,Num
+VITA,Number of volunteer income tax assistance (VITA) prepared returns [5],,Num
+TCE,Number of tax counseling for the elderly (TCE) prepared returns [5],,Num
+VITA_EIC,Number of volunteer prepared returns with Earned Income Credit [5],,Num
+RAC,Number of refund anticipation check returns [6],,Num
+ELDERLY,Number of elderly returns [7],,Num
+A00100,Adjust gross income (AGI) [8],  1040:11,Num
+A02650,Total income amount,  1040:9,Num
+A00200,Salaries and wages amount,  1040:1,Num
+A00300,Taxable interest amount,  1040:2b,Num
+A00600,Ordinary dividends amount,  1040:3b,Num
+A00650,Qualified dividends amount [9],  1040:3a,Num
+A00700,State and local income tax refunds amount,  Schedule 1:1,Num
+A00900,Business or professional net income (less loss) amount,  Schedule 1:3,Num
+A01000,Net capital gain (less loss) amount,  1040:7,Num
+A01400,Taxable individual retirement arrangements distributions amount,  1040:4b,Num
+A01700,Taxable pensions and annuities amount,  1040:5b,Num
+SCHF,Number of farm returns,  Schedule 1:6,Num
+A02300,Unemployment compensation amount [10],  Schedule 1:7,Num
+A02500,Taxable Social Security benefits amount,  1040:6b,Num
+A26270,Partnership/S-corp net income (less loss) amount,  Schedule E:32,Num
+A02900,Total statutory adjustments amount,  Schedule 1:26,Num
+A03220,Educator expenses amount,  Schedule 1:11,Num
+A03300,Self-employed (Keogh) retirement plans amount,  Schedule 1:16,Num
+A03270,Self-employed health insurance deduction amount,  Schedule 1:17,Num
+A03150,Individual retirement arrangement payments amount,  Schedule 1:20,Num
+A03210,Student loan interest deduction amount,  Schedule 1:21,Num
+A02910,Charitable contributions if took standard deduction,  1040:12b,Num
+A04450,Total standard deduction amount,  1040:12a,Num
+A04100,Basic standard deduction amount,  1040:12a,Num
+A04200,Additional standard deduction amount,  1040:12a,Num
+A04470,Total itemized deductions amount,  1040:12a,Num
+A00101,Amount of AGI for itemized returns,  1040:11,Num
+A17000,Total medical and dental expense deduction amount,  Schedule A:4,Num
+A18425,State and local income taxes amount,  Schedule A:5a,Num
+A18450,State and local general sales tax amount,  Schedule A:5a,Num
+A18500,Real estate taxes amount,  Schedule A:5b,Num
+A18800,Personal property taxes amount,  Schedule A:5c,Num
+A18460,Limited state and local taxes,  Schedule A:5e,Num
+A18300,Total taxes paid amount,  Schedule A:7,Num
+A19300,Home mortgage interest paid amount,  Schedule A:8a,Num
+A19500,Home mortgage from personal seller amount,  Schedule A:8b,Num
+A19530,Deductible points amount,  Schedule A:8c,Num
+A19550,Qualified mortgage insurance premiums amount,  Schedule A:8d,Num
+A19570,Investment interest paid amount,  Schedule A:9,Num
+A19700,Total charitable contributions amount,  Schedule A:14,Num
+A20950,Other non-limited miscellaneous deductions amount,  Schedule A:16,Num
+A04475,Qualified business income deduction,  1040:13,Num
+A04800,Taxable income amount,  1040:15,Num
+A05800,Income tax before credits amount,  1040:16,Num
+A09600,Alternative minimum tax amount,  Schedule 2:1,Num
+A05780,Excess advance premium tax credit repayment amount,  Schedule 2:2,Num
+A07100,Total tax credits amount,  1040:21,Num
+A07300,Foreign tax credit amount,  Schedule 3:1,Num
+A07180,Child and dependent care credit amount,  Schedule 3:2,Num
+A07230,Nonrefundable education credit amount,  Schedule 3:3,Num
+A07240,Retirement savings contribution credit amount,  Schedule 3:4,Num
+A07225,Nonrefundable child and other dependent credit amount,  1040:19,Num
+A07260,Residential energy tax credit amount,  Schedule 3:5,Num
+A09400,Self-employment tax amount,  Schedule 2:4,Num
+A85770,Total premium tax credit amount,  8962:24,Num
+A85775,Advance premium tax credit amount,  8962:25,Num
+A10600,Total tax payments amount,  1040:33,Num
+A59660,Earned income credit amount [12]  ,  1040:27,Num
+A59720,Excess earned income credit (refundable) amount [13]  ,  1040:27,Num
+A11070,Refundable child tax credit or additional child tax credit amount,  1040:28,Num
+A10960,Refundable education credit amount,  1040:29,Num
+A11560,Net premium tax credit amount,  Schedule 3:8,Num
+A11450,"Qualified sick and family leave credit for leave taken before April 1, 2021 amount",  Schedule 3:13b,Num
+A11520,Refundable child and dependent care credit, Schedule 3:13g,Num
+A11530,"Qualified sick and family leave credit for leave taken after March 31, 2021", Schedule 3:13h,Num
+A10970,Recovery rebate credit amount [15],  1040:30,Num
+A10971,"Economic impact payment third round amount [16, 17]",,Num
+A06500,Income tax after credits amount   ,  1040:22,Num
+A10300,Total tax liability amount [18]  ,  1040:24, Num
+A85530,Additional Medicare tax amount,  8959:24, Num
+A85300,Net investment income tax amount,  8960:17, Num
+A11901,Tax due at time of filing amount [19]  ,  1040:37, Num
+A11900,Total overpayments amount,  1040:34, Num
+A11902,Overpayments refunded amount [20]  ,  1040:35a, Num
+A12000,Credited to next year’s estimated tax amount,  1040:36, Num

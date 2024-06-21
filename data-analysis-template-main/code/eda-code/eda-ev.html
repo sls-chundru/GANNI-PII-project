@@ -1,0 +1,2958 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2024-06-21">
+
+<title>EV Exploratory Data Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="eda-ev_files/libs/clipboard/clipboard.min.js"></script>
+<script src="eda-ev_files/libs/quarto-html/quarto.js"></script>
+<script src="eda-ev_files/libs/quarto-html/popper.min.js"></script>
+<script src="eda-ev_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="eda-ev_files/libs/quarto-html/anchor.min.js"></script>
+<link href="eda-ev_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="eda-ev_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="eda-ev_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="eda-ev_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="eda-ev_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">EV Exploratory Data Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 21, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="setup" class="level1">
+<h1>Setup</h1>
+<div id="a2de7ea9" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load needed packages. make sure they are installed.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pandas <span class="im">import</span> read_csv, set_option, merge, DataFrame, concat</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression, LogisticRegression</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> LabelEncoder, StandardScaler</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.graphics.gofplots <span class="im">import</span> ProbPlot</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>set_option(<span class="st">'display.max_columns'</span>, <span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Load the data.</p>
+<div id="c4247f5c" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>base_dir <span class="op">=</span> <span class="st">'../../'</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> read_csv(base_dir <span class="op">+</span> <span class="st">'data/processed-data/brand_model_year_tax_data.csv'</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>columns_list <span class="op">=</span> df.columns.tolist()</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> columns_list:</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(i.strip())</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>numeric_cols <span class="op">=</span> columns_list[<span class="dv">28</span>:]</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>df.columns.tolist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>City
+State
+ZIPCODE
+Model Year
+Make
+Model
+Electric Vehicle Type
+Clean Alternative Fuel Vehicle (CAFV) Eligibility
+Electric Range
+Vehicle Count
+The State Federal Information Processing System (FIPS) code
+The State associated with the ZIP code
+Number of returns [3]
+Number of single returns
+Number of joint returns
+Number of head of household returns
+Number of electronically filed returns
+Number of computer prepared paper returns
+Number of returns with paid preparer's signature
+Number of returns with direct deposit
+Number of returns with virtual currency indicator
+Number of individuals [4]
+Total number of volunteer prepared returns [5]
+Number of volunteer income tax assistance (VITA) prepared returns [5]
+Number of tax counseling for the elderly (TCE) prepared returns [5]
+Number of volunteer prepared returns with Earned Income Credit [5]
+Number of refund anticipation check returns [6]
+Number of elderly returns [7]
+Adjust gross income (AGI) [8]
+Total income amount
+Salaries and wages amount
+Taxable interest amount
+Ordinary dividends amount
+Qualified dividends amount [9]
+State and local income tax refunds amount
+Business or professional net income (less loss) amount
+Net capital gain (less loss) amount
+Taxable individual retirement arrangements distributions amount
+Taxable pensions and annuities amount
+Number of farm returns
+Unemployment compensation amount [10]
+Taxable Social Security benefits amount
+Partnership/S-corp net income (less loss) amount
+Total statutory adjustments amount
+Educator expenses amount
+Self-employed (Keogh) retirement plans amount
+Self-employed health insurance deduction amount
+Individual retirement arrangement payments amount
+Student loan interest deduction amount
+Charitable contributions if took standard deduction
+Total standard deduction amount
+Basic standard deduction amount
+Additional standard deduction amount
+Total itemized deductions amount
+Amount of AGI for itemized returns
+Total medical and dental expense deduction amount
+State and local income taxes amount
+State and local general sales tax amount
+Real estate taxes amount
+Personal property taxes amount
+Limited state and local taxes
+Total taxes paid amount
+Home mortgage interest paid amount
+Home mortgage from personal seller amount
+Deductible points amount
+Qualified mortgage insurance premiums amount
+Investment interest paid amount
+Total charitable contributions amount
+Other non-limited miscellaneous deductions amount
+Qualified business income deduction
+Taxable income amount
+Income tax before credits amount
+Alternative minimum tax amount
+Excess advance premium tax credit repayment amount
+Total tax credits amount
+Foreign tax credit amount
+Child and dependent care credit amount
+Nonrefundable education credit amount
+Retirement savings contribution credit amount
+Nonrefundable child and other dependent credit amount
+Residential energy tax credit amount
+Self-employment tax amount
+Total premium tax credit amount
+Advance premium tax credit amount
+Total tax payments amount
+Earned income credit amount [12]
+Excess earned income credit (refundable) amount [13]
+Refundable child tax credit or additional child tax credit amount
+Refundable education credit amount
+Net premium tax credit amount
+Qualified sick and family leave credit for leave taken before April 1, 2021 amount
+Refundable child and dependent care credit
+Qualified sick and family leave credit for leave taken after March 31, 2021
+Recovery rebate credit amount [15]
+Economic impact payment third round amount [16, 17]
+Income tax after credits amount
+Total tax liability amount [18]
+Additional Medicare tax amount
+Net investment income tax amount
+Tax due at time of filing amount [19]
+Total overpayments amount
+Overpayments refunded amount [20]
+Credited to next year’s estimated tax amount</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>['City',
+ 'State',
+ 'ZIPCODE',
+ 'Model Year',
+ 'Make',
+ 'Model',
+ 'Electric Vehicle Type',
+ 'Clean Alternative Fuel Vehicle (CAFV) Eligibility',
+ 'Electric Range',
+ 'Vehicle Count',
+ 'The State Federal Information Processing System (FIPS) code',
+ 'The State associated with the ZIP code',
+ 'Number of returns [3]',
+ 'Number of single returns',
+ 'Number of joint returns',
+ 'Number of head of household returns',
+ 'Number of electronically filed returns',
+ 'Number of computer prepared paper returns',
+ "Number of returns with paid preparer's signature",
+ 'Number of returns with direct deposit',
+ 'Number of returns with virtual currency indicator',
+ 'Number of individuals [4]',
+ 'Total number of volunteer prepared returns [5]',
+ 'Number of volunteer income tax assistance (VITA) prepared returns [5]',
+ 'Number of tax counseling for the elderly (TCE) prepared returns [5]',
+ 'Number of volunteer prepared returns with Earned Income Credit [5]',
+ 'Number of refund anticipation check returns [6]',
+ 'Number of elderly returns [7]',
+ 'Adjust gross income (AGI) [8]',
+ 'Total income amount',
+ 'Salaries and wages amount',
+ 'Taxable interest amount',
+ 'Ordinary dividends amount',
+ 'Qualified dividends amount [9]',
+ 'State and local income tax refunds amount',
+ 'Business or professional net income (less loss) amount',
+ 'Net capital gain (less loss) amount',
+ 'Taxable individual retirement arrangements distributions amount',
+ 'Taxable pensions and annuities amount',
+ 'Number of farm returns',
+ 'Unemployment compensation amount [10]',
+ 'Taxable Social Security benefits amount',
+ 'Partnership/S-corp net income (less loss) amount',
+ 'Total statutory adjustments amount',
+ 'Educator expenses amount',
+ 'Self-employed (Keogh) retirement plans amount',
+ 'Self-employed health insurance deduction amount',
+ 'Individual retirement arrangement payments amount',
+ 'Student loan interest deduction amount',
+ 'Charitable contributions if took standard deduction',
+ 'Total standard deduction amount',
+ 'Basic standard deduction amount',
+ 'Additional standard deduction amount',
+ 'Total itemized deductions amount',
+ 'Amount of AGI for itemized returns',
+ 'Total medical and dental expense deduction amount',
+ 'State and local income taxes amount',
+ 'State and local general sales tax amount',
+ 'Real estate taxes amount',
+ 'Personal property taxes amount',
+ 'Limited state and local taxes',
+ 'Total taxes paid amount',
+ 'Home mortgage interest paid amount',
+ 'Home mortgage from personal seller amount',
+ 'Deductible points amount',
+ 'Qualified mortgage insurance premiums amount',
+ 'Investment interest paid amount',
+ 'Total charitable contributions amount',
+ 'Other non-limited miscellaneous deductions amount',
+ 'Qualified business income deduction',
+ 'Taxable income amount',
+ 'Income tax before credits amount',
+ 'Alternative minimum tax amount',
+ 'Excess advance premium tax credit repayment amount',
+ 'Total tax credits amount',
+ 'Foreign tax credit amount',
+ 'Child and dependent care credit amount',
+ 'Nonrefundable education credit amount',
+ 'Retirement savings contribution credit amount',
+ 'Nonrefundable child and other dependent credit amount',
+ 'Residential energy tax credit amount',
+ 'Self-employment tax amount',
+ 'Total premium tax credit amount',
+ 'Advance premium tax credit amount',
+ 'Total tax payments amount',
+ 'Earned income credit amount [12]  ',
+ 'Excess earned income credit (refundable) amount [13]  ',
+ 'Refundable child tax credit or additional child tax credit amount',
+ 'Refundable education credit amount',
+ 'Net premium tax credit amount',
+ 'Qualified sick and family leave credit for leave taken before April 1, 2021 amount',
+ 'Refundable child and dependent care credit',
+ 'Qualified sick and family leave credit for leave taken after March 31, 2021',
+ 'Recovery rebate credit amount [15]',
+ 'Economic impact payment third round amount [16, 17]',
+ 'Income tax after credits amount   ',
+ 'Total tax liability amount [18]  ',
+ 'Additional Medicare tax amount',
+ 'Net investment income tax amount',
+ 'Tax due at time of filing amount [19]  ',
+ 'Total overpayments amount',
+ 'Overpayments refunded amount [20]  ',
+ 'Credited to next year’s estimated tax amount']</code></pre>
+</div>
+</div>
+<p>Vehicle Brand Aggregation</p>
+<div id="d9810531" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sns.set_style(<span class="st">'darkgrid'</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>zip_code_count <span class="op">=</span> df.groupby([<span class="st">'ZIPCODE'</span>, <span class="st">'Electric Vehicle Type'</span>]).agg({</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Vehicle Count'</span>: <span class="st">'sum'</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>}).reset_index()</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">15</span>))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>sns.histplot(ax<span class="op">=</span>axes[<span class="dv">0</span>], data<span class="op">=</span>zip_code_count, y<span class="op">=</span>zip_code_count[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>log_zip_code_count <span class="op">=</span> zip_code_count.copy()</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>log_zip_code_count[<span class="st">'Vehicle Count'</span>] <span class="op">=</span> np.log(zip_code_count[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>sns.histplot(ax<span class="op">=</span>axes[<span class="dv">1</span>], data<span class="op">=</span>log_zip_code_count, y<span class="op">=</span>log_zip_code_count[<span class="st">'Vehicle Count'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-4-output-1.png" width="1192" height="1167" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cb264597" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">15</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>sns.boxplot(ax<span class="op">=</span>axes[<span class="dv">0</span>], data<span class="op">=</span>zip_code_count, x<span class="op">=</span>zip_code_count[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>log_zip_code_count <span class="op">=</span> zip_code_count.copy()</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>log_zip_code_count[<span class="st">'Vehicle Count'</span>] <span class="op">=</span> np.log(zip_code_count[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>sns.boxplot(ax<span class="op">=</span>axes[<span class="dv">1</span>], data<span class="op">=</span>log_zip_code_count, x<span class="op">=</span>log_zip_code_count[<span class="st">'Vehicle Count'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-5-output-1.png" width="1137" height="1167" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>MAKE AND ELECTRIC VEHICLE TYPE</p>
+<div id="729923e5" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sns.set_style(<span class="st">'darkgrid'</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>make_ev_type <span class="op">=</span> df.groupby([<span class="st">'Make'</span>, <span class="st">'Electric Vehicle Type'</span>]).agg({</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Vehicle Count'</span>: <span class="st">'sum'</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>}).reset_index()</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">15</span>))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>sns.histplot(ax<span class="op">=</span>axes[<span class="dv">0</span>], data<span class="op">=</span>make_ev_type, y<span class="op">=</span>make_ev_type[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>log_make_ev_type <span class="op">=</span> make_ev_type.copy()</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>log_make_ev_type[<span class="st">'Vehicle Count'</span>] <span class="op">=</span> np.log(make_ev_type[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>sns.histplot(ax<span class="op">=</span>axes[<span class="dv">1</span>], data<span class="op">=</span>log_make_ev_type, y<span class="op">=</span>log_make_ev_type[<span class="st">'Vehicle Count'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-6-output-1.png" width="1199" height="1167" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="847e1ff4" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">15</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>sns.boxplot(ax<span class="op">=</span>axes[<span class="dv">0</span>], data<span class="op">=</span>make_ev_type, x<span class="op">=</span>make_ev_type[<span class="st">'Electric Vehicle Type'</span>], y<span class="op">=</span>make_ev_type[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>log_make_ev_type <span class="op">=</span> make_ev_type.copy()</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>log_make_ev_type[<span class="st">'Vehicle Count'</span>] <span class="op">=</span> np.log(make_ev_type[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>sns.boxplot(ax<span class="op">=</span>axes[<span class="dv">1</span>], data<span class="op">=</span>log_make_ev_type, x<span class="op">=</span>make_ev_type[<span class="st">'Electric Vehicle Type'</span>], y<span class="op">=</span>log_make_ev_type[<span class="st">'Vehicle Count'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-7-output-1.png" width="1199" height="1167" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>MAKE AND Clean Alt Fuel</p>
+<div id="591ef712" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sns.set_style(<span class="st">'darkgrid'</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>make_ev_type <span class="op">=</span> df.groupby([<span class="st">'Make'</span>, <span class="st">'Clean Alternative Fuel Vehicle (CAFV) Eligibility'</span>]).agg({</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Vehicle Count'</span>: <span class="st">'sum'</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>}).reset_index()</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">15</span>))</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>sns.histplot(ax<span class="op">=</span>axes[<span class="dv">0</span>], data<span class="op">=</span>make_ev_type, y<span class="op">=</span>make_ev_type[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>log_make_ev_type <span class="op">=</span> make_ev_type.copy()</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>log_make_ev_type[<span class="st">'Vehicle Count'</span>] <span class="op">=</span> np.log(make_ev_type[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>sns.histplot(ax<span class="op">=</span>axes[<span class="dv">1</span>], data<span class="op">=</span>log_make_ev_type, y<span class="op">=</span>log_make_ev_type[<span class="st">'Vehicle Count'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-8-output-1.png" width="1199" height="1167" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="70c73ab0" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">15</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>sns.boxplot(ax<span class="op">=</span>axes[<span class="dv">0</span>], data<span class="op">=</span>make_ev_type, x<span class="op">=</span>make_ev_type[<span class="st">'Clean Alternative Fuel Vehicle (CAFV) Eligibility'</span>], y<span class="op">=</span>make_ev_type[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>log_make_ev_type <span class="op">=</span> make_ev_type.copy()</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>log_make_ev_type[<span class="st">'Vehicle Count'</span>] <span class="op">=</span> np.log(make_ev_type[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>sns.boxplot(ax<span class="op">=</span>axes[<span class="dv">1</span>], data<span class="op">=</span>log_make_ev_type, x<span class="op">=</span>make_ev_type[<span class="st">'Clean Alternative Fuel Vehicle (CAFV) Eligibility'</span>], y<span class="op">=</span>log_make_ev_type[<span class="st">'Vehicle Count'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-9-output-1.png" width="1199" height="1167" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Mean</p>
+<div id="6e213e68" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>brand_df <span class="op">=</span> df[[</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a> <span class="st">'Residential energy tax credit amount'</span>, <span class="st">'Total income amount'</span>, <span class="st">'Vehicle Count'</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>]]</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">15</span>))</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>sns.heatmap(data<span class="op">=</span>brand_df)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>brand_df.corr()</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># brand_df['Electric Range'] = np.log(brand_df['Electric Range'])</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co"># sns.boxplot(ax=axes[1], data=brand_df, y=brand_df['Electric Range'])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Residential energy tax credit amount</th>
+<th data-quarto-table-cell-role="th">Total income amount</th>
+<th data-quarto-table-cell-role="th">Vehicle Count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Residential energy tax credit amount</td>
+<td>1.000000</td>
+<td>0.503153</td>
+<td>0.154667</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Total income amount</td>
+<td>0.503153</td>
+<td>1.000000</td>
+<td>0.213034</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Vehicle Count</td>
+<td>0.154667</td>
+<td>0.213034</td>
+<td>1.000000</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-10-output-2.png" width="1098" height="1163" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="39204fcf" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>new_brand_df  <span class="op">=</span> df.groupby([<span class="st">'ZIPCODE'</span>]).agg({</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Total income amount'</span>: <span class="st">'sum'</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Electric Range'</span>: <span class="st">'count'</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>}).reset_index(drop<span class="op">=</span><span class="va">True</span>).rename(columns<span class="op">=</span>{</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Electric Range'</span>: <span class="st">'Vehicle Count'</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">15</span>))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>new_brand_df[<span class="st">'Total income amount'</span>] <span class="op">=</span> new_brand_df[<span class="st">'Total income amount'</span>].astype(<span class="bu">int</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>slope, intercept, r_value, p_value, std_err <span class="op">=</span> stats.linregress(new_brand_df[<span class="st">'Total income amount'</span>],new_brand_df[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>sns.regplot(ax<span class="op">=</span>axes[<span class="dv">0</span>], data<span class="op">=</span>new_brand_df, y<span class="op">=</span><span class="st">'Vehicle Count'</span>, x<span class="op">=</span><span class="st">'Total income amount'</span>, </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    ci<span class="op">=</span><span class="va">None</span>, </span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="ss">f"y=</span><span class="sc">{</span><span class="dv">0</span><span class="sc">:.1f}</span><span class="ss">x+</span><span class="sc">{</span><span class="dv">1</span><span class="sc">:.1f}</span><span class="ch">\n</span><span class="ss">r-sq: </span><span class="sc">{</span>r_value<span class="sc">.</span><span class="bu">round</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="ss">"</span>.<span class="bu">format</span>(slope, intercept)).legend(loc<span class="op">=</span><span class="st">"best"</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>new_brand_df[<span class="st">'Vehicle Count'</span>] <span class="op">=</span> np.log(new_brand_df[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>new_brand_df[<span class="st">'Total income amount'</span>] <span class="op">=</span> np.log(new_brand_df[<span class="st">'Total income amount'</span>])</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>slope, intercept, r_value, p_value, std_err <span class="op">=</span> stats.linregress(new_brand_df[<span class="st">'Total income amount'</span>],new_brand_df[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>sns.regplot(ax<span class="op">=</span>axes[<span class="dv">1</span>],</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>new_brand_df,</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">'Total income amount'</span>,</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">'Vehicle Count'</span>, </span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    ci<span class="op">=</span><span class="va">None</span>, </span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="ss">f"y=</span><span class="sc">{</span><span class="dv">0</span><span class="sc">:.1f}</span><span class="ss">x+</span><span class="sc">{</span><span class="dv">1</span><span class="sc">:.1f}</span><span class="ch">\n</span><span class="ss">r-sq: </span><span class="sc">{</span>r_value<span class="sc">.</span><span class="bu">round</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="ss">"</span>.<span class="bu">format</span>(slope, intercept)).legend(loc<span class="op">=</span><span class="st">"best"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-11-output-1.png" width="1192" height="1167" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="fa1bfb63" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>base_dir <span class="op">=</span> <span class="st">'../../'</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> read_csv(base_dir <span class="op">+</span> <span class="st">'data/processed-data/brand_model_year_tax_data.csv'</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>columns_list <span class="op">=</span> df.columns.tolist()</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> columns_list:</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(i.strip())</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co"># numeric_cols = columns_list[28:]</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># df.columns.tolist()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>City
+State
+ZIPCODE
+Model Year
+Make
+Model
+Electric Vehicle Type
+Clean Alternative Fuel Vehicle (CAFV) Eligibility
+Electric Range
+Vehicle Count
+The State Federal Information Processing System (FIPS) code
+The State associated with the ZIP code
+Number of returns [3]
+Number of single returns
+Number of joint returns
+Number of head of household returns
+Number of electronically filed returns
+Number of computer prepared paper returns
+Number of returns with paid preparer's signature
+Number of returns with direct deposit
+Number of returns with virtual currency indicator
+Number of individuals [4]
+Total number of volunteer prepared returns [5]
+Number of volunteer income tax assistance (VITA) prepared returns [5]
+Number of tax counseling for the elderly (TCE) prepared returns [5]
+Number of volunteer prepared returns with Earned Income Credit [5]
+Number of refund anticipation check returns [6]
+Number of elderly returns [7]
+Adjust gross income (AGI) [8]
+Total income amount
+Salaries and wages amount
+Taxable interest amount
+Ordinary dividends amount
+Qualified dividends amount [9]
+State and local income tax refunds amount
+Business or professional net income (less loss) amount
+Net capital gain (less loss) amount
+Taxable individual retirement arrangements distributions amount
+Taxable pensions and annuities amount
+Number of farm returns
+Unemployment compensation amount [10]
+Taxable Social Security benefits amount
+Partnership/S-corp net income (less loss) amount
+Total statutory adjustments amount
+Educator expenses amount
+Self-employed (Keogh) retirement plans amount
+Self-employed health insurance deduction amount
+Individual retirement arrangement payments amount
+Student loan interest deduction amount
+Charitable contributions if took standard deduction
+Total standard deduction amount
+Basic standard deduction amount
+Additional standard deduction amount
+Total itemized deductions amount
+Amount of AGI for itemized returns
+Total medical and dental expense deduction amount
+State and local income taxes amount
+State and local general sales tax amount
+Real estate taxes amount
+Personal property taxes amount
+Limited state and local taxes
+Total taxes paid amount
+Home mortgage interest paid amount
+Home mortgage from personal seller amount
+Deductible points amount
+Qualified mortgage insurance premiums amount
+Investment interest paid amount
+Total charitable contributions amount
+Other non-limited miscellaneous deductions amount
+Qualified business income deduction
+Taxable income amount
+Income tax before credits amount
+Alternative minimum tax amount
+Excess advance premium tax credit repayment amount
+Total tax credits amount
+Foreign tax credit amount
+Child and dependent care credit amount
+Nonrefundable education credit amount
+Retirement savings contribution credit amount
+Nonrefundable child and other dependent credit amount
+Residential energy tax credit amount
+Self-employment tax amount
+Total premium tax credit amount
+Advance premium tax credit amount
+Total tax payments amount
+Earned income credit amount [12]
+Excess earned income credit (refundable) amount [13]
+Refundable child tax credit or additional child tax credit amount
+Refundable education credit amount
+Net premium tax credit amount
+Qualified sick and family leave credit for leave taken before April 1, 2021 amount
+Refundable child and dependent care credit
+Qualified sick and family leave credit for leave taken after March 31, 2021
+Recovery rebate credit amount [15]
+Economic impact payment third round amount [16, 17]
+Income tax after credits amount
+Total tax liability amount [18]
+Additional Medicare tax amount
+Net investment income tax amount
+Tax due at time of filing amount [19]
+Total overpayments amount
+Overpayments refunded amount [20]
+Credited to next year’s estimated tax amount</code></pre>
+</div>
+</div>
+<p>ZIP CODE ONLY</p>
+<div id="0502c743" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>amount_brand_df <span class="op">=</span> df.groupby([<span class="st">'ZIPCODE'</span>, <span class="st">'Electric Vehicle Type'</span>])[numeric_cols].mean(numeric_only<span class="op">=</span><span class="va">True</span>).reset_index()</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>brand_df <span class="op">=</span> df.groupby([<span class="st">'ZIPCODE'</span>, <span class="st">'Electric Vehicle Type'</span>]).agg({</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Vehicle Count'</span>: <span class="st">'sum'</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Electric Range'</span>: <span class="st">'mean'</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>}).reset_index()</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>merged_df <span class="op">=</span> merge(brand_df, amount_brand_df, on<span class="op">=</span>[<span class="st">'ZIPCODE'</span>, <span class="st">'Electric Vehicle Type'</span>])</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>label_encoder <span class="op">=</span> LabelEncoder()</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>label_encoder.fit(merged_df[<span class="st">'Electric Vehicle Type'</span>])</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>encoded_labels <span class="op">=</span> label_encoder.transform(merged_df[<span class="st">'Electric Vehicle Type'</span>])</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>merged_df[<span class="st">'Electric Vehicle Type'</span>] <span class="op">=</span> encoded_labels</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co"># print(merged_df['Vehicle Count'].sort_values(ascending=True).unique().tolist())</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>merged_df <span class="op">=</span> merged_df.sort_values(<span class="st">'Vehicle Count'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(merged_df)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co"># merged_df['Vehicle Count'] = np.log(merged_df['Vehicle Count'])</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co"># merged_df = merged_df.loc[(merged_df['Vehicle Count'] &lt; 5.0)]</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>merged_df <span class="op">=</span> merged_df.loc[(merged_df[<span class="st">'Vehicle Count'</span>] <span class="op">!=</span> <span class="fl">5.187386</span>) <span class="op">&amp;</span> (merged_df[<span class="st">'ZIPCODE'</span>] <span class="op">!=</span> <span class="fl">98134.0</span>)]</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>X_df <span class="op">=</span> merged_df</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>Y_df <span class="op">=</span> merged_df[[<span class="st">'Vehicle Count'</span>]]</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>Y_df <span class="op">=</span> np.log(Y_df)</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>X_df <span class="op">=</span> merged_df.drop([<span class="st">'Vehicle Count'</span>, <span class="st">'Electric Range'</span>, <span class="st">'ZIPCODE'</span>], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.array(X_df)</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> sm.add_constant(X)</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> np.array(Y_df)</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(x,Y, </span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>                                   random_state<span class="op">=</span><span class="dv">104</span>,  </span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>                                   test_size<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>                                   shuffle<span class="op">=</span><span class="va">True</span>) </span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X_train.shape)</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(y_train.shape)</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> sm.OLS(y_train, X_train)</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> model.fit()</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>results.summary()</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>p_values <span class="op">=</span> results.pvalues</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>p_df <span class="op">=</span> DataFrame()</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>p_df[<span class="st">'Feature'</span>] <span class="op">=</span> X_df.columns</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>p_df[<span class="st">'p-value'</span>] <span class="op">=</span> results.pvalues[<span class="dv">1</span>:]</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>feat_list <span class="op">=</span> []</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>p_val_list <span class="op">=</span> []</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, row <span class="kw">in</span> p_df.iterrows():</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row[<span class="st">'p-value'</span>] <span class="op">&lt;</span> <span class="fl">.05</span>:</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>        feat_list.append(row[<span class="st">'Feature'</span>])</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>        p_val_list.append(row[<span class="st">'p-value'</span>])</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>new_p_df <span class="op">=</span> DataFrame()</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>new_p_df[<span class="st">'Feature'</span>] <span class="op">=</span> feat_list</span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>new_p_df[<span class="st">'p-value'</span>] <span class="op">=</span> p_val_list</span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.array(X_df[new_p_df[<span class="st">'Feature'</span>]])</span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> np.array(Y_df)</span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> sm.add_constant(X)</span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(x,Y, </span>
+<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a>                                   random_state<span class="op">=</span><span class="dv">104</span>,  </span>
+<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a>                                   test_size<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a>                                   shuffle<span class="op">=</span><span class="va">True</span>) </span>
+<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a>model2 <span class="op">=</span> sm.OLS(y_train, X_train)</span>
+<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a>results2 <span class="op">=</span> model2.fit()</span>
+<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a>results2.summary()</span>
+<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a>p3_values <span class="op">=</span> results2.pvalues</span>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a>new3 <span class="op">=</span> DataFrame()</span>
+<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a>new3[<span class="st">'Feature'</span>] <span class="op">=</span> new_p_df[<span class="st">'Feature'</span>]</span>
+<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a>new3[<span class="st">'p-value'</span>] <span class="op">=</span> p3_values[<span class="dv">1</span>:]</span>
+<span id="cb15-68"><a href="#cb15-68" aria-hidden="true" tabindex="-1"></a>new3</span>
+<span id="cb15-69"><a href="#cb15-69" aria-hidden="true" tabindex="-1"></a>feat_list3 <span class="op">=</span> []</span>
+<span id="cb15-70"><a href="#cb15-70" aria-hidden="true" tabindex="-1"></a>p_val_list3 <span class="op">=</span> []</span>
+<span id="cb15-71"><a href="#cb15-71" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, row <span class="kw">in</span> new3.iterrows():</span>
+<span id="cb15-72"><a href="#cb15-72" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row[<span class="st">'p-value'</span>] <span class="op">&lt;</span> <span class="fl">.05</span>:</span>
+<span id="cb15-73"><a href="#cb15-73" aria-hidden="true" tabindex="-1"></a>        feat_list3.append(row[<span class="st">'Feature'</span>])</span>
+<span id="cb15-74"><a href="#cb15-74" aria-hidden="true" tabindex="-1"></a>        p_val_list3.append(row[<span class="st">'p-value'</span>])</span>
+<span id="cb15-75"><a href="#cb15-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb15-76"><a href="#cb15-76" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb15-77"><a href="#cb15-77" aria-hidden="true" tabindex="-1"></a>final3_df <span class="op">=</span> DataFrame()</span>
+<span id="cb15-78"><a href="#cb15-78" aria-hidden="true" tabindex="-1"></a>final3_df[<span class="st">'Feature'</span>] <span class="op">=</span> feat_list3</span>
+<span id="cb15-79"><a href="#cb15-79" aria-hidden="true" tabindex="-1"></a>final3_df[<span class="st">'p-value'</span>] <span class="op">=</span> p_val_list3</span>
+<span id="cb15-80"><a href="#cb15-80" aria-hidden="true" tabindex="-1"></a>final3_df</span>
+<span id="cb15-81"><a href="#cb15-81" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.array(X_df[final3_df[<span class="st">'Feature'</span>]])</span>
+<span id="cb15-82"><a href="#cb15-82" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> np.array(Y_df)</span>
+<span id="cb15-83"><a href="#cb15-83" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> sm.add_constant(X)</span>
+<span id="cb15-84"><a href="#cb15-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-85"><a href="#cb15-85" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(x,Y, </span>
+<span id="cb15-86"><a href="#cb15-86" aria-hidden="true" tabindex="-1"></a>                                   random_state<span class="op">=</span><span class="dv">104</span>,  </span>
+<span id="cb15-87"><a href="#cb15-87" aria-hidden="true" tabindex="-1"></a>                                   test_size<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb15-88"><a href="#cb15-88" aria-hidden="true" tabindex="-1"></a>                                   shuffle<span class="op">=</span><span class="va">True</span>) </span>
+<span id="cb15-89"><a href="#cb15-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-90"><a href="#cb15-90" aria-hidden="true" tabindex="-1"></a>model3 <span class="op">=</span> sm.OLS(y_train, X_train)</span>
+<span id="cb15-91"><a href="#cb15-91" aria-hidden="true" tabindex="-1"></a>results3 <span class="op">=</span> model3.fit()</span>
+<span id="cb15-92"><a href="#cb15-92" aria-hidden="true" tabindex="-1"></a>Y_pred <span class="op">=</span> results3.predict(X_train).astype(<span class="bu">int</span>)</span>
+<span id="cb15-93"><a href="#cb15-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-94"><a href="#cb15-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-95"><a href="#cb15-95" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [<span class="st">'constant'</span>] <span class="op">+</span> final3_df[<span class="st">'Feature'</span>].tolist()</span>
+<span id="cb15-96"><a href="#cb15-96" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> DataFrame(X_train, columns<span class="op">=</span>features)</span>
+<span id="cb15-97"><a href="#cb15-97" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> DataFrame(y_train, columns<span class="op">=</span>[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb15-98"><a href="#cb15-98" aria-hidden="true" tabindex="-1"></a>dataframe <span class="op">=</span> concat([X, Y], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb15-99"><a href="#cb15-99" aria-hidden="true" tabindex="-1"></a>dataframe</span>
+<span id="cb15-100"><a href="#cb15-100" aria-hidden="true" tabindex="-1"></a><span class="co"># results3.summary()</span></span>
+<span id="cb15-101"><a href="#cb15-101" aria-hidden="true" tabindex="-1"></a>features</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     ZIPCODE  Electric Vehicle Type  Vehicle Count  Electric Range  \
+74     98052                      0           1157      156.519907   
+50     98033                      0            882      166.503841   
+126    98115                      0            803      152.658181   
+10     98006                      0            774      169.153312   
+6      98004                      0            738      202.561223   
+..       ...                    ...            ...             ...   
+670    98923                      1              1       53.000000   
+771    99147                      1              1       21.000000   
+768    99137                      0              1      322.000000   
+765    99130                      1              1       25.000000   
+745    99110                      1              1       72.000000   
+
+     Adjust gross income (AGI) [8]  Total income amount  \
+74                      11469221.0         1.150090e+07   
+50                       9075809.0         9.127683e+06   
+126                      5660508.0         5.705396e+06   
+10                       5554414.0         5.594606e+06   
+6                       10285419.0         1.032864e+07   
+..                             ...                  ...   
+670                        41479.0         4.192500e+04   
+771                         9996.0         9.996000e+03   
+768                         9869.0         9.886000e+03   
+765                        25382.0         2.557800e+04   
+745                        57444.0         5.774600e+04   
+
+     Salaries and wages amount  Taxable interest amount  \
+74                   6520580.0                  28414.0   
+50                   4591533.0                  34969.0   
+126                  3677409.0                  21267.0   
+10                   3258348.0                  28544.0   
+6                    5076645.0                  79717.0   
+..                         ...                      ...   
+670                    30107.0                     41.0   
+771                     4162.0                     27.0   
+768                     5113.0                     28.0   
+765                    15086.0                     72.0   
+745                    34988.0                    125.0   
+
+     Ordinary dividends amount  Qualified dividends amount [9]  \
+74                    241134.0                        200658.0   
+50                    321104.0                        262470.0   
+126                   183825.0                        139464.0   
+10                    170168.0                        127659.0   
+6                     462927.0                        306156.0   
+..                         ...                             ...   
+670                      362.0                           206.0   
+771                       57.0                            30.0   
+768                       52.0                            22.0   
+765                      201.0                           110.0   
+745                      264.0                           122.0   
+
+     State and local income tax refunds amount  \
+74                                        86.0   
+50                                       139.0   
+126                                       72.0   
+10                                        47.0   
+6                                        149.0   
+..                                         ...   
+670                                        0.0   
+771                                        0.0   
+768                                        0.0   
+765                                        0.0   
+745                                        0.0   
+
+     Business or professional net income (less loss) amount  \
+74                                            110229.0        
+50                                            206670.0        
+126                                           146455.0        
+10                                            118329.0        
+6                                             153582.0        
+..                                                 ...        
+670                                              700.0        
+771                                                0.0        
+768                                                0.0        
+765                                               89.0        
+745                                             1682.0        
+
+     Net capital gain (less loss) amount  \
+74                             1140096.0   
+50                             1967750.0   
+126                             953676.0   
+10                             1245685.0   
+6                              3298449.0   
+..                                   ...   
+670                               2146.0   
+771                                134.0   
+768                                531.0   
+765                               1121.0   
+745                               1389.0   
+
+     Taxable individual retirement arrangements distributions amount  \
+74                                             99509.0                 
+50                                            109867.0                 
+126                                           130601.0                 
+10                                            159792.0                 
+6                                             148744.0                 
+..                                                 ...                 
+670                                              802.0                 
+771                                              378.0                 
+768                                                0.0                 
+765                                              495.0                 
+745                                             1642.0                 
+
+     Taxable pensions and annuities amount  Number of farm returns  \
+74                                105202.0                     0.0   
+50                                101748.0                    27.0   
+126                               156388.0                    27.0   
+10                                112086.0                    20.0   
+6                                  85009.0                    22.0   
+..                                     ...                     ...   
+670                                 2116.0                    32.0   
+771                                 1440.0                     0.0   
+768                                 1319.0                     0.0   
+765                                 2667.0                    25.0   
+745                                 4289.0                    37.0   
+
+     Unemployment compensation amount [10]  \
+74                                 43653.0   
+50                                 28701.0   
+126                                42111.0   
+10                                 30108.0   
+6                                  20827.0   
+..                                     ...   
+670                                 1095.0   
+771                                    0.0   
+768                                    0.0   
+765                                  285.0   
+745                                 1207.0   
+
+     Taxable Social Security benefits amount  \
+74                                   73032.0   
+50                                   70386.0   
+126                                  95828.0   
+10                                   72298.0   
+6                                    63596.0   
+..                                       ...   
+670                                   1401.0   
+771                                    936.0   
+768                                    538.0   
+765                                   1199.0   
+745                                   1885.0   
+
+     Partnership/S-corp net income (less loss) amount  \
+74                                           189874.0   
+50                                           498727.0   
+126                                          262147.0   
+10                                           343116.0   
+6                                            834329.0   
+..                                                ...   
+670                                            1671.0   
+771                                               0.0   
+768                                               0.0   
+765                                            1948.0   
+745                                            4810.0   
+
+     Total statutory adjustments amount  Educator expenses amount  \
+74                              31684.0                      87.0   
+50                              51874.0                      56.0   
+126                             44888.0                     118.0   
+10                              40192.0                      63.0   
+6                               43218.0                      27.0   
+..                                  ...                       ...   
+670                               446.0                       0.0   
+771                                 0.0                       0.0   
+768                                17.0                       0.0   
+765                               196.0                       0.0   
+745                               302.0                       0.0   
+
+     Self-employed (Keogh) retirement plans amount  \
+74                                          7858.0   
+50                                         14500.0   
+126                                        14597.0   
+10                                         13177.0   
+6                                          13686.0   
+..                                             ...   
+670                                            0.0   
+771                                            0.0   
+768                                            0.0   
+765                                            0.0   
+745                                            0.0   
+
+     Self-employed health insurance deduction amount  \
+74                                            6483.0   
+50                                           10507.0   
+126                                          10354.0   
+10                                            9141.0   
+6                                            10221.0   
+..                                               ...   
+670                                              0.0   
+771                                              0.0   
+768                                              0.0   
+765                                              0.0   
+745                                              0.0   
+
+     Individual retirement arrangement payments amount  \
+74                                              2987.0   
+50                                              2306.0   
+126                                             3057.0   
+10                                              3691.0   
+6                                               2306.0   
+..                                                 ...   
+670                                                0.0   
+771                                                0.0   
+768                                                0.0   
+765                                                0.0   
+745                                                0.0   
+
+     Student loan interest deduction amount  \
+74                                    555.0   
+50                                    274.0   
+126                                   612.0   
+10                                    159.0   
+6                                     239.0   
+..                                      ...   
+670                                     0.0   
+771                                     0.0   
+768                                     0.0   
+765                                     0.0   
+745                                     0.0   
+
+     Charitable contributions if took standard deduction  \
+74                                              3848.0     
+50                                              2109.0     
+126                                             3344.0     
+10                                              2251.0     
+6                                               1832.0     
+..                                                 ...     
+670                                               54.0     
+771                                               16.0     
+768                                               24.0     
+765                                               57.0     
+745                                               99.0     
+
+     Total standard deduction amount  Basic standard deduction amount  \
+74                          528025.0                         521124.0   
+50                          254157.0                         248614.0   
+126                         384956.0                         376803.0   
+10                          271831.0                         265655.0   
+6                           252566.0                         248083.0   
+..                               ...                              ...   
+670                          12670.0                          12467.0   
+771                           2289.0                           2160.0   
+768                           3309.0                           3181.0   
+765                           7038.0                           6841.0   
+745                          14517.0                          14217.0   
+
+     Additional standard deduction amount  Total itemized deductions amount  \
+74                                 6901.0                          249445.0   
+50                                 5544.0                          331843.0   
+126                                8153.0                          242498.0   
+10                                 6174.0                          198820.0   
+6                                  4482.0                          375719.0   
+..                                    ...                               ...   
+670                                 202.0                               0.0   
+771                                 123.0                               0.0   
+768                                 119.0                               0.0   
+765                                 194.0                               0.0   
+745                                 299.0                            1249.0   
+
+     Amount of AGI for itemized returns  \
+74                            2960814.0   
+50                            5953823.0   
+126                           2679230.0   
+10                            2624996.0   
+6                             6598885.0   
+..                                  ...   
+670                                 0.0   
+771                                 0.0   
+768                                 0.0   
+765                                 0.0   
+745                              7431.0   
+
+     Total medical and dental expense deduction amount  \
+74                                             25586.0   
+50                                             13737.0   
+126                                            20974.0   
+10                                             15154.0   
+6                                              17461.0   
+..                                                 ...   
+670                                                0.0   
+771                                                0.0   
+768                                                0.0   
+765                                                0.0   
+745                                                0.0   
+
+     State and local income taxes amount  \
+74                                7876.0   
+50                               32721.0   
+126                              12363.0   
+10                               13289.0   
+6                                36060.0   
+..                                   ...   
+670                                  0.0   
+771                                  0.0   
+768                                  0.0   
+765                                  0.0   
+745                                  0.0   
+
+     State and local general sales tax amount  Real estate taxes amount  \
+74                                    16960.0                   49671.0   
+50                                    22606.0                   72293.0   
+126                                   16322.0                   51789.0   
+10                                    12837.0                   47829.0   
+6                                     12015.0                   74886.0   
+..                                        ...                       ...   
+670                                       0.0                       0.0   
+771                                       0.0                       0.0   
+768                                       0.0                       0.0   
+765                                       0.0                       0.0   
+745                                      53.0                     107.0   
+
+     Personal property taxes amount  Limited state and local taxes  \
+74                           1867.0                        50647.0   
+50                           2067.0                        52347.0   
+126                          1631.0                        51635.0   
+10                           1630.0                        40499.0   
+6                            1375.0                        37206.0   
+..                              ...                            ...   
+670                             0.0                            0.0   
+771                             0.0                            0.0   
+768                             0.0                            0.0   
+765                             0.0                            0.0   
+745                             0.0                          198.0   
+
+     Total taxes paid amount  Home mortgage interest paid amount  \
+74                   51153.0                             80373.0   
+50                   52752.0                             88916.0   
+126                  51885.0                             79851.0   
+10                   40726.0                             65570.0   
+6                    37457.0                             61954.0   
+..                       ...                                 ...   
+670                      0.0                                 0.0   
+771                      0.0                                 0.0   
+768                      0.0                                 0.0   
+765                      0.0                                 0.0   
+745                    198.0                                 0.0   
+
+     Home mortgage from personal seller amount  Deductible points amount  \
+74                                      1475.0                    1008.0   
+50                                      1975.0                     718.0   
+126                                     1334.0                     660.0   
+10                                      1050.0                     506.0   
+6                                       2168.0                     492.0   
+..                                         ...                       ...   
+670                                        0.0                       0.0   
+771                                        0.0                       0.0   
+768                                        0.0                       0.0   
+765                                        0.0                       0.0   
+745                                        0.0                       0.0   
+
+     Qualified mortgage insurance premiums amount  \
+74                                          106.0   
+50                                          140.0   
+126                                         141.0   
+10                                           40.0   
+6                                            25.0   
+..                                            ...   
+670                                           0.0   
+771                                           0.0   
+768                                           0.0   
+765                                           0.0   
+745                                           0.0   
+
+     Investment interest paid amount  Total charitable contributions amount  \
+74                            4968.0                                76944.0   
+50                            8484.0                               150375.0   
+126                           3199.0                                78003.0   
+10                            4763.0                                60551.0   
+6                            27156.0                               214699.0   
+..                               ...                                    ...   
+670                              0.0                                    0.0   
+771                              0.0                                    0.0   
+768                              0.0                                    0.0   
+765                              0.0                                    0.0   
+745                              0.0                                  483.0   
+
+     Other non-limited miscellaneous deductions amount  \
+74                                              7243.0   
+50                                             11819.0   
+126                                             4730.0   
+10                                              9994.0   
+6                                              12967.0   
+..                                                 ...   
+670                                                0.0   
+771                                                0.0   
+768                                                0.0   
+765                                                0.0   
+745                                                0.0   
+
+     Qualified business income deduction  Taxable income amount  \
+74                               44521.0              9930593.0   
+50                               80129.0              7610660.0   
+126                              50866.0              4995173.0   
+10                               60924.0              5035260.0   
+6                               139937.0              9526741.0   
+..                                   ...                    ...   
+670                                439.0                28007.0   
+771                                  0.0                 7550.0   
+768                                  0.0                 6784.0   
+765                                514.0                17925.0   
+745                                849.0                40794.0   
+
+     Income tax before credits amount  Alternative minimum tax amount  \
+74                          2236954.0                          5276.0   
+50                          1909603.0                         11840.0   
+126                         1092674.0                          3778.0   
+10                          1200114.0                          6326.0   
+6                           2508777.0                          7158.0   
+..                                ...                             ...   
+670                            3958.0                             0.0   
+771                            1002.0                             0.0   
+768                             927.0                             0.0   
+765                            2504.0                             0.0   
+745                            5518.0                             0.0   
+
+     Excess advance premium tax credit repayment amount  \
+74                                               603.0    
+50                                               511.0    
+126                                              647.0    
+10                                               679.0    
+6                                                550.0    
+..                                                 ...    
+670                                                0.0    
+771                                                0.0    
+768                                                0.0    
+765                                                0.0    
+745                                                0.0    
+
+     Total tax credits amount  Foreign tax credit amount  \
+74                    30058.0                    21822.0   
+50                    26299.0                    18578.0   
+126                   23205.0                    10302.0   
+10                    29514.0                    23338.0   
+6                     85435.0                    75575.0   
+..                        ...                        ...   
+670                     173.0                        0.0   
+771                       0.0                        0.0   
+768                       7.0                        0.0   
+765                      50.0                        0.0   
+745                     134.0                        1.0   
+
+     Child and dependent care credit amount  \
+74                                    116.0   
+50                                     41.0   
+126                                   106.0   
+10                                     45.0   
+6                                      29.0   
+..                                      ...   
+670                                     0.0   
+771                                     0.0   
+768                                     0.0   
+765                                     0.0   
+745                                     0.0   
+
+     Nonrefundable education credit amount  \
+74                                  1575.0   
+50                                   796.0   
+126                                 1606.0   
+10                                  1066.0   
+6                                    733.0   
+..                                     ...   
+670                                   33.0   
+771                                    0.0   
+768                                    0.0   
+765                                    0.0   
+745                                   28.0   
+
+     Retirement savings contribution credit amount  \
+74                                           127.0   
+50                                            63.0   
+126                                           90.0   
+10                                            82.0   
+6                                             53.0   
+..                                             ...   
+670                                            9.0   
+771                                            0.0   
+768                                            0.0   
+765                                            0.0   
+745                                           10.0   
+
+     Nonrefundable child and other dependent credit amount  \
+74                                              2035.0       
+50                                               857.0       
+126                                             1126.0       
+10                                              1273.0       
+6                                                636.0       
+..                                                 ...       
+670                                               49.0       
+771                                                0.0       
+768                                                0.0       
+765                                               15.0       
+745                                               40.0       
+
+     Residential energy tax credit amount  Self-employment tax amount  \
+74                                  575.0                     15224.0   
+50                                  666.0                     19446.0   
+126                                 706.0                     22422.0   
+10                                  421.0                     16083.0   
+6                                   263.0                     19058.0   
+..                                    ...                         ...   
+670                                   0.0                       243.0   
+771                                   0.0                         0.0   
+768                                   0.0                         0.0   
+765                                   0.0                       110.0   
+745                                   0.0                       245.0   
+
+     Total premium tax credit amount  Advance premium tax credit amount  \
+74                            5060.0                             4860.0   
+50                            2931.0                             2812.0   
+126                           3640.0                             3353.0   
+10                            4649.0                             4524.0   
+6                             2746.0                             2740.0   
+..                               ...                                ...   
+670                              0.0                                0.0   
+771                              0.0                                0.0   
+768                              0.0                                0.0   
+765                              0.0                                0.0   
+745                            145.0                              143.0   
+
+     Total tax payments amount  Earned income credit amount [12]    \
+74                   2293371.0                              2831.0   
+50                   1958357.0                              1296.0   
+126                  1085793.0                              2028.0   
+10                   1150453.0                              1775.0   
+6                    2488909.0                              1150.0   
+..                         ...                                 ...   
+670                     5439.0                               304.0   
+771                     1023.0                                 0.0   
+768                     1187.0                                72.0   
+765                     2676.0                               134.0   
+745                     6973.0                               408.0   
+
+     Excess earned income credit (refundable) amount [13]    \
+74                                              1972.0        
+50                                               898.0        
+126                                             1420.0        
+10                                              1241.0        
+6                                                788.0        
+..                                                 ...        
+670                                              208.0        
+771                                                0.0        
+768                                               61.0        
+765                                              104.0        
+745                                              300.0        
+
+     Refundable child tax credit or additional child tax credit amount  \
+74                                             12385.0                   
+50                                              5916.0                   
+126                                             8726.0                   
+10                                              7325.0                   
+6                                               3899.0                   
+..                                                 ...                   
+670                                              615.0                   
+771                                                0.0                   
+768                                               76.0                   
+765                                              320.0                   
+745                                              789.0                   
+
+     Refundable education credit amount  Net premium tax credit amount  \
+74                                772.0                          979.0   
+50                                399.0                          727.0   
+126                               581.0                         1030.0   
+10                                619.0                         1019.0   
+6                                 359.0                          684.0   
+..                                  ...                            ...   
+670                                21.0                            0.0   
+771                                 0.0                            0.0   
+768                                 0.0                            0.0   
+765                                 0.0                            0.0   
+745                                 0.0                            0.0   
+
+     Qualified sick and family leave credit for leave taken before April 1, 2021 amount  \
+74                                               138.0                                    
+50                                                 0.0                                    
+126                                               57.0                                    
+10                                                90.0                                    
+6                                                103.0                                    
+..                                                 ...                                    
+670                                                0.0                                    
+771                                                0.0                                    
+768                                                0.0                                    
+765                                                0.0                                    
+745                                                0.0                                    
+
+     Refundable child and dependent care credit  \
+74                                       1190.0   
+50                                        720.0   
+126                                      1518.0   
+10                                        804.0   
+6                                         418.0   
+..                                          ...   
+670                                         0.0   
+771                                         0.0   
+768                                         0.0   
+765                                         0.0   
+745                                         0.0   
+
+     Qualified sick and family leave credit for leave taken after March 31, 2021  \
+74                                               109.0                             
+50                                                34.0                             
+126                                              110.0                             
+10                                                84.0                             
+6                                                 93.0                             
+..                                                 ...                             
+670                                                0.0                             
+771                                                0.0                             
+768                                                0.0                             
+765                                                0.0                             
+745                                                0.0                             
+
+     Recovery rebate credit amount [15]  \
+74                               3480.0   
+50                               1681.0   
+126                              2545.0   
+10                               1937.0   
+6                                1743.0   
+..                                  ...   
+670                                91.0   
+771                                 0.0   
+768                                 0.0   
+765                                 0.0   
+745                               129.0   
+
+     Economic impact payment third round amount [16, 17]  \
+74                                             38168.0     
+50                                             20428.0     
+126                                            33632.0     
+10                                             23736.0     
+6                                              18070.0     
+..                                                 ...     
+670                                             1701.0     
+771                                              239.0     
+768                                              426.0     
+765                                              999.0     
+745                                             2161.0     
+
+     Income tax after credits amount     Total tax liability amount [18]    \
+74                            2206895.0                          2401744.0   
+50                            1850387.0                          1999908.0   
+126                           1069469.0                          1135279.0   
+10                            1170596.0                          1243681.0   
+6                             2423341.0                          2587608.0   
+..                                  ...                                ...   
+670                              3746.0                             4128.0   
+771                               995.0                             1064.0   
+768                               917.0                             1011.0   
+765                              2449.0                             2688.0   
+745                              5388.0                             5720.0   
+
+     Additional Medicare tax amount  Net investment income tax amount  \
+74                          23460.0                           39685.0   
+50                          23126.0                           84240.0   
+126                         11676.0                           28108.0   
+10                          13720.0                           41217.0   
+6                           28413.0                          112856.0   
+..                              ...                               ...   
+670                             0.0                               0.0   
+771                             0.0                               0.0   
+768                             0.0                               0.0   
+765                             0.0                               0.0   
+745                             0.0                               0.0   
+
+     Tax due at time of filing amount [19]    Total overpayments amount  \
+74                                  261873.0                   101606.0   
+50                                  245394.0                   130111.0   
+126                                 142559.0                    92334.0   
+10                                  179928.0                    85579.0   
+6                                   313370.0                   212568.0   
+..                                       ...                        ...   
+670                                    473.0                     1685.0   
+771                                    149.0                      173.0   
+768                                    123.0                      278.0   
+765                                    559.0                      731.0   
+745                                    800.0                     2049.0   
+
+     Overpayments refunded amount [20]    \
+74                               78312.0   
+50                               52177.0   
+126                              58805.0   
+10                               44559.0   
+6                                66714.0   
+..                                   ...   
+670                               1635.0   
+771                                171.0   
+768                                277.0   
+765                                718.0   
+745                               1889.0   
+
+     Credited to next year’s estimated tax amount  
+74                                        23032.0  
+50                                        77752.0  
+126                                       33529.0  
+10                                        40783.0  
+6                                        145464.0  
+..                                            ...  
+670                                           0.0  
+771                                           0.0  
+768                                           0.0  
+765                                           0.0  
+745                                           0.0  
+
+[867 rows x 79 columns]
+(692, 77)
+(692, 1)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>['constant',
+ 'Electric Vehicle Type',
+ 'Adjust gross income (AGI) [8]',
+ 'Total income amount',
+ 'State and local income tax refunds amount',
+ 'Taxable pensions and annuities amount',
+ 'Number of farm returns',
+ 'Total statutory adjustments amount',
+ 'Self-employed (Keogh) retirement plans amount',
+ 'Total standard deduction amount',
+ 'Basic standard deduction amount',
+ 'Additional standard deduction amount',
+ 'Total medical and dental expense deduction amount',
+ 'Limited state and local taxes',
+ 'Home mortgage from personal seller amount',
+ 'Alternative minimum tax amount',
+ 'Child and dependent care credit amount',
+ 'Net premium tax credit amount',
+ 'Qualified sick and family leave credit for leave taken before April 1, 2021 amount',
+ 'Credited to next year’s estimated tax amount']</code></pre>
+</div>
+</div>
+<div id="312156c8" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># model values</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>model_fitted_y <span class="op">=</span> results3.fittedvalues</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># model residuals</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>model_residuals <span class="op">=</span> results3.resid</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># normalized residuals</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>model_norm_residuals <span class="op">=</span> results3.get_influence().resid_studentized_internal</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co"># absolute squared normalized residuals</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>model_norm_residuals_abs_sqrt <span class="op">=</span> np.sqrt(np.<span class="bu">abs</span>(model_norm_residuals))</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co"># absolute residuals</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>model_abs_resid <span class="op">=</span> np.<span class="bu">abs</span>(model_residuals)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="co"># leverage, from statsmodels internals</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>model_leverage <span class="op">=</span> results3.get_influence().hat_matrix_diag</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="co"># cook's distance, from statsmodels internals</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>model_cooks <span class="op">=</span> results3.get_influence().cooks_distance[<span class="dv">0</span>]</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>plot_lm_1 <span class="op">=</span> plt.figure()</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>plot_lm_1.axes[<span class="dv">0</span>] <span class="op">=</span> sns.residplot(x<span class="op">=</span>model_fitted_y, y<span class="op">=</span>dataframe.columns[<span class="op">-</span><span class="dv">1</span>], data<span class="op">=</span>dataframe,</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>                          lowess<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>                          scatter_kws<span class="op">=</span>{<span class="st">'alpha'</span>: <span class="fl">0.5</span>},</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>                          line_kws<span class="op">=</span>{<span class="st">'color'</span>: <span class="st">'red'</span>, <span class="st">'lw'</span>: <span class="dv">1</span>, <span class="st">'alpha'</span>: <span class="fl">0.8</span>})</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>plot_lm_1.axes[<span class="dv">0</span>].set_title(<span class="st">'Residuals vs Fitted'</span>)</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>plot_lm_1.axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Fitted values'</span>)</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>plot_lm_1.axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Residuals'</span>)</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> DataFrame()</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'res'</span>] <span class="op">=</span> model_residuals</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'fitted'</span>] <span class="op">=</span> model_fitted_y</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'count'</span>] <span class="op">=</span> dataframe[<span class="st">'Vehicle Count'</span>]</span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a><span class="co"># df['ZIPCODE'] = dataframe['ZIPCODE']</span></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>maxr <span class="op">=</span> np.<span class="bu">max</span>(model_residuals)</span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>df.sort_values(<span class="st">'fitted'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">res</th>
+<th data-quarto-table-cell-role="th">fitted</th>
+<th data-quarto-table-cell-role="th">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">675</td>
+<td>-1.054547</td>
+<td>7.558835</td>
+<td>6.504288</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">190</td>
+<td>-1.038863</td>
+<td>7.494061</td>
+<td>6.455199</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">433</td>
+<td>-0.972422</td>
+<td>7.267688</td>
+<td>6.295266</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">117</td>
+<td>-0.185570</td>
+<td>7.239156</td>
+<td>7.053586</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">585</td>
+<td>-0.339142</td>
+<td>6.990714</td>
+<td>6.651572</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">607</td>
+<td>0.089480</td>
+<td>-0.089480</td>
+<td>0.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">468</td>
+<td>0.130421</td>
+<td>-0.130421</td>
+<td>0.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">227</td>
+<td>0.131590</td>
+<td>-0.131590</td>
+<td>0.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">442</td>
+<td>1.237539</td>
+<td>-0.138926</td>
+<td>1.098612</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">515</td>
+<td>0.854031</td>
+<td>-0.160884</td>
+<td>0.693147</td>
+</tr>
+</tbody>
+</table>
+
+<p>692 rows × 3 columns</p>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-14-output-2.png" width="582" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="normal-q-q-plot" class="level4">
+<h4 class="anchored" data-anchor-id="normal-q-q-plot">Normal Q-Q Plot</h4>
+<p>This plot shows if the residuals are normally distributed. A good normal QQ plot has all of the residuals lying on or close to the red line.</p>
+<div id="8f15bf4f" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>QQ <span class="op">=</span> ProbPlot(model_norm_residuals)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>plot_lm_2 <span class="op">=</span> QQ.qqplot(line<span class="op">=</span><span class="st">'45'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">'#4C72B0'</span>, lw<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>plot_lm_2.axes[<span class="dv">0</span>].set_title(<span class="st">'Normal Q-Q'</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>plot_lm_2.axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Theoretical Quantiles'</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>plot_lm_2.axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Standardized Residuals'</span>)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># annotations</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>abs_norm_resid <span class="op">=</span> np.flip(np.argsort(np.<span class="bu">abs</span>(model_norm_residuals)), <span class="dv">0</span>)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>abs_norm_resid_top_3 <span class="op">=</span> abs_norm_resid[:<span class="dv">3</span>]</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r, i <span class="kw">in</span> <span class="bu">enumerate</span>(abs_norm_resid_top_3):</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    plot_lm_2.axes[<span class="dv">0</span>].annotate(i,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>                               xy<span class="op">=</span>(np.flip(QQ.theoretical_quantiles, <span class="dv">0</span>)[r],</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>                                   model_norm_residuals[i]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-15-output-1.png" width="582" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="scale-location" class="level4">
+<h4 class="anchored" data-anchor-id="scale-location">Scale-Location</h4>
+<p>This plot is a way to check if the residuals suffer from non-constant variance, aka heteroscedasticity.</p>
+<div id="b4aef196" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>plot_lm_3 <span class="op">=</span> plt.figure()</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(model_fitted_y, model_norm_residuals_abs_sqrt, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>sns.regplot(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>model_fitted_y, </span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>model_norm_residuals_abs_sqrt,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    scatter<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    ci<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    lowess<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    line_kws<span class="op">=</span>{<span class="st">'color'</span>: <span class="st">'red'</span>, <span class="st">'lw'</span>: <span class="dv">1</span>, <span class="st">'alpha'</span>: <span class="fl">0.8</span>})</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>plot_lm_3.axes[<span class="dv">0</span>].set_title(<span class="st">'Scale-Location'</span>)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>plot_lm_3.axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Fitted values'</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>plot_lm_3.axes[<span class="dv">0</span>].set_ylabel(<span class="st">'$\sqrt{|Standardized Residuals|}$'</span>)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co"># annotations</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>abs_sq_norm_resid <span class="op">=</span> np.flip(np.argsort(model_norm_residuals_abs_sqrt), <span class="dv">0</span>)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>abs_sq_norm_resid_top_3 <span class="op">=</span> abs_sq_norm_resid[:<span class="dv">3</span>]</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r, i <span class="kw">in</span> <span class="bu">enumerate</span>(abs_sq_norm_resid_top_3):</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    plot_lm_3.axes[<span class="dv">0</span>].annotate(</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>        i,</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>        xy<span class="op">=</span>(model_fitted_y[i],</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>        model_norm_residuals_abs_sqrt[i]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-16-output-1.png" width="602" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="residuals-vs.-leverage" class="level4">
+<h4 class="anchored" data-anchor-id="residuals-vs.-leverage">Residuals vs.&nbsp;Leverage</h4>
+<p>Unlike outliers, which have an unusually large y value, leverage points have extreme x values. This may not seem so bad at face value, but it can have damaging effects on the model because the β coefficients are very sensitive to leverage points. The purpose of the Residuals vs Leverage plot is to identify these problematic observations.</p>
+<div id="87bf9482" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>plot_lm_4 <span class="op">=</span> plt.figure()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(model_leverage, model_norm_residuals, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>sns.regplot(x<span class="op">=</span>model_leverage, y<span class="op">=</span>model_norm_residuals,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>            scatter<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>            ci<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>            lowess<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>            line_kws<span class="op">=</span>{<span class="st">'color'</span>: <span class="st">'red'</span>, <span class="st">'lw'</span>: <span class="dv">1</span>, <span class="st">'alpha'</span>: <span class="fl">0.8</span>})</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>plot_lm_4.axes[<span class="dv">0</span>].set_xlim(<span class="dv">0</span>, np.<span class="bu">max</span>(model_leverage)<span class="op">+</span><span class="fl">0.01</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>plot_lm_4.axes[<span class="dv">0</span>].set_ylim(<span class="op">-</span><span class="dv">3</span>, <span class="dv">5</span>)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>plot_lm_4.axes[<span class="dv">0</span>].set_title(<span class="st">'Residuals vs Leverage'</span>)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>plot_lm_4.axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Leverage'</span>)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>plot_lm_4.axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Standardized Residuals'</span>)</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="co"># annotations</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>leverage_top_3 <span class="op">=</span> np.flip(np.argsort(model_cooks), <span class="dv">0</span>)[:<span class="dv">3</span>]</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> leverage_top_3:</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    plot_lm_4.axes[<span class="dv">0</span>].annotate(i,</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>                                xy<span class="op">=</span>(model_leverage[i],</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>                                    model_norm_residuals[i]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-17-output-1.png" width="591" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="fc213b73" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cookdplot(model, ax<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ax <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    cooks_d <span class="op">=</span> model.get_influence().cooks_distance[<span class="dv">0</span>]</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    ax.vlines(<span class="bu">range</span>(<span class="bu">len</span>(cooks_d)),<span class="dv">0</span>,cooks_d)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># annotations</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    cookd_top_3 <span class="op">=</span> np.flip(np.argsort(cooks_d), <span class="dv">0</span>)[:<span class="dv">3</span>]</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> cookd_top_3:</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        ax.annotate(i, xy<span class="op">=</span>(i, cooks_d[i]),color <span class="op">=</span> <span class="st">'C3'</span>)</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="st">"Cook's Distance"</span> , fontweight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">'Obs. Number'</span>)</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="st">"Cook's distance"</span>)</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ax</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>cookdplot(results3)</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-18-output-1.png" width="593" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="second-model" class="level3">
+<h3 class="anchored" data-anchor-id="second-model">SECOND MODEL</h3>
+<div id="121b6dfb" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># merged_df = merged_df.loc[(merged_df['Vehicle Count'] != 1.94591)]</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co"># print(merged_df.loc[merged_df['Vehicle Count'] &lt; 5].sort_values('Vehicle Count', ascending=False).head(30))</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>X_df <span class="op">=</span> merged_df.copy()</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Y_df = merged_df[['Vehicle Count']]</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Y_df = np.log(Y_df['Vehicle Count'])</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>X_features <span class="op">=</span> [</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a> <span class="st">'Electric Vehicle Type'</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a> <span class="st">'Adjust gross income (AGI) [8]'</span>,</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a> <span class="st">'Total income amount'</span>,</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co">#  'State and local income tax refunds amount',</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a> <span class="st">'Taxable pensions and annuities amount'</span>,</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a> <span class="st">'Number of farm returns'</span>,</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a> <span class="st">'Total statutory adjustments amount'</span>,</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="co">#  'Self-employed (Keogh) retirement plans amount',</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a> <span class="st">'Total standard deduction amount'</span>,</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a> <span class="st">'Basic standard deduction amount'</span>,</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a> <span class="st">'Additional standard deduction amount'</span>,</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="co">#  'Total medical and dental expense deduction amount',</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a> <span class="st">'Limited state and local taxes'</span>,</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a> <span class="st">'Home mortgage from personal seller amount'</span>,</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a> <span class="st">'Alternative minimum tax amount'</span>,</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a> <span class="st">'Child and dependent care credit amount'</span>,</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a> <span class="st">'Net premium tax credit amount'</span>,</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a><span class="co">#  'Qualified sick and family leave credit for leave taken before April 1, 2021 amount',</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a><span class="co">#  'Credited to next year’s estimated tax amount'</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a> ]</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>X_df <span class="op">=</span> X_df[X_features]</span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>feat_list <span class="op">=</span> []</span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>log_list <span class="op">=</span> []</span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> feat <span class="kw">in</span> X_features:</span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>    feat_list.append(feat)</span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>    log_list.append(np.log(X_df[feat]))</span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a><span class="co"># X_features = ['ZIPCODE',</span></span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a><span class="co">#  'Adjust gross income (AGI) [8]',</span></span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a><span class="co">#  'Total income amount',</span></span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a><span class="co">#  'Total statutory adjustments amount',</span></span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a><span class="co">#  'Home mortgage from personal seller amount',</span></span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a><span class="co">#  'Alternative minimum tax amount']</span></span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> X_df[X_features]</span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> Y_df</span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> sm.add_constant(X)</span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(x,Y, </span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a>                                   random_state<span class="op">=</span><span class="dv">104</span>,  </span>
+<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a>                                   test_size<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a>                                   shuffle<span class="op">=</span><span class="va">True</span>) </span>
+<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X_train)</span>
+<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> sm.OLS(y_train, X_train)</span>
+<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a>results2mod <span class="op">=</span> model.fit()</span>
+<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a><span class="co"># Y_pred = results2mod.predict(X_test).astype(int)</span></span>
+<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a>results2mod.summary()</span>
+<span id="cb23-59"><a href="#cb23-59" aria-hidden="true" tabindex="-1"></a><span class="co"># model1 = LinearRegression().fit(X_train, y_train)</span></span>
+<span id="cb23-60"><a href="#cb23-60" aria-hidden="true" tabindex="-1"></a><span class="co"># model1.score(X_train, y_train)</span></span>
+<span id="cb23-61"><a href="#cb23-61" aria-hidden="true" tabindex="-1"></a><span class="co"># model1.score(X_test, y_test)</span></span>
+<span id="cb23-62"><a href="#cb23-62" aria-hidden="true" tabindex="-1"></a><span class="co"># results2mod.summary()</span></span>
+<span id="cb23-63"><a href="#cb23-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-64"><a href="#cb23-64" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> DataFrame(X_train, columns<span class="op">=</span>[<span class="st">'constant'</span>] <span class="op">+</span> X_features)</span>
+<span id="cb23-65"><a href="#cb23-65" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> DataFrame(y_train, columns<span class="op">=</span>[<span class="st">'Vehicle Count'</span>])</span>
+<span id="cb23-66"><a href="#cb23-66" aria-hidden="true" tabindex="-1"></a>dataframe <span class="op">=</span> concat([X, Y], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb23-67"><a href="#cb23-67" aria-hidden="true" tabindex="-1"></a><span class="co"># dataframe</span></span>
+<span id="cb23-68"><a href="#cb23-68" aria-hidden="true" tabindex="-1"></a>results2mod.summary()</span>
+<span id="cb23-69"><a href="#cb23-69" aria-hidden="true" tabindex="-1"></a><span class="co"># model.coef_</span></span>
+<span id="cb23-70"><a href="#cb23-70" aria-hidden="true" tabindex="-1"></a><span class="co"># model.intercept_</span></span>
+<span id="cb23-71"><a href="#cb23-71" aria-hidden="true" tabindex="-1"></a><span class="co"># Y_pred = model.predict(X_test)</span></span>
+<span id="cb23-72"><a href="#cb23-72" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.scatter(x=y_test, y=Y_pred)</span></span>
+<span id="cb23-73"><a href="#cb23-73" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.plot(y_test, Y_pred, color='red')    </span></span>
+<span id="cb23-74"><a href="#cb23-74" aria-hidden="true" tabindex="-1"></a><span class="co"># sns.regplot(x=y_test, y=Y_pred)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     const  Electric Vehicle Type  Adjust gross income (AGI) [8]  \
+164    1.0                      1                      2694401.0   
+145    1.0                      1                      2509477.0   
+248    1.0                      0                      1095655.0   
+235    1.0                      0                        55512.0   
+815    1.0                      1                       677806.0   
+..     ...                    ...                            ...   
+651    1.0                      0                       145772.0   
+621    1.0                      0                       498815.0   
+763    1.0                      1                        23962.0   
+182    1.0                      1                        23947.0   
+123    1.0                      1                      3337166.0   
+
+     Total income amount  Taxable pensions and annuities amount  \
+164         2.718487e+06                                76040.0   
+145         2.528506e+06                                93932.0   
+248         1.105507e+06                                68138.0   
+235         5.649500e+04                                 5324.0   
+815         6.821880e+05                                40699.0   
+..                   ...                                    ...   
+651         1.469230e+05                                16739.0   
+621         5.037780e+05                                32399.0   
+763         2.407200e+04                                 2442.0   
+182         2.419800e+04                                 1770.0   
+123         3.381398e+06                               129085.0   
+
+     Number of farm returns  Total statutory adjustments amount  \
+164                     0.0                             24086.0   
+145                    23.0                             19029.0   
+248                   121.0                              9852.0   
+235                     0.0                               983.0   
+815                    67.0                              4382.0   
+..                      ...                                 ...   
+651                   116.0                              1151.0   
+621                    42.0                              4963.0   
+763                     0.0                               110.0   
+182                    20.0                               251.0   
+123                    55.0                             44232.0   
+
+     Total standard deduction amount  Basic standard deduction amount  \
+164                         138310.0                         133732.0   
+145                         373994.0                         366523.0   
+248                         244433.0                         238820.0   
+235                           8125.0                           7697.0   
+815                         152823.0                         149737.0   
+..                               ...                              ...   
+651                          48980.0                          47622.0   
+621                          64621.0                          62599.0   
+763                           7008.0                           6782.0   
+182                           5908.0                           5750.0   
+123                         174136.0                         167326.0   
+
+     Additional standard deduction amount  Limited state and local taxes  \
+164                                4579.0                        24955.0   
+145                                7471.0                        22760.0   
+248                                5612.0                         6661.0   
+235                                 430.0                          496.0   
+815                                3086.0                         2957.0   
+..                                    ...                            ...   
+651                                1357.0                          388.0   
+621                                2023.0                         3261.0   
+763                                 219.0                            0.0   
+182                                 154.0                            0.0   
+123                                6809.0                        28459.0   
+
+     Home mortgage from personal seller amount  \
+164                                      758.0   
+145                                      517.0   
+248                                        0.0   
+235                                        0.0   
+815                                        0.0   
+..                                         ...   
+651                                        0.0   
+621                                        0.0   
+763                                        0.0   
+182                                        0.0   
+123                                      937.0   
+
+     Alternative minimum tax amount  Child and dependent care credit amount  \
+164                          1042.0                                    51.0   
+145                           533.0                                   124.0   
+248                             0.0                                    21.0   
+235                             0.0                                     0.0   
+815                             0.0                                     0.0   
+..                              ...                                     ...   
+651                             0.0                                     0.0   
+621                             0.0                                     0.0   
+763                             0.0                                     0.0   
+182                             0.0                                     0.0   
+123                          2629.0                                     0.0   
+
+     Net premium tax credit amount  
+164                          420.0  
+145                          871.0  
+248                          365.0  
+235                            0.0  
+815                          176.0  
+..                             ...  
+651                           51.0  
+621                          250.0  
+763                            0.0  
+182                            0.0  
+123                          835.0  
+
+[692 rows x 15 columns]</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<table class="simpletable caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<caption>OLS Regression Results</caption>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Dep. Variable:</td>
+<td>Vehicle Count</td>
+<td data-quarto-table-cell-role="th">R-squared:</td>
+<td>0.850</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Model:</td>
+<td>OLS</td>
+<td data-quarto-table-cell-role="th">Adj. R-squared:</td>
+<td>0.847</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Method:</td>
+<td>Least Squares</td>
+<td data-quarto-table-cell-role="th">F-statistic:</td>
+<td>273.9</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Date:</td>
+<td>Fri, 21 Jun 2024</td>
+<td data-quarto-table-cell-role="th">Prob (F-statistic):</td>
+<td>1.27e-267</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Time:</td>
+<td>18:12:09</td>
+<td data-quarto-table-cell-role="th">Log-Likelihood:</td>
+<td>-704.45</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">No. Observations:</td>
+<td>692</td>
+<td data-quarto-table-cell-role="th">AIC:</td>
+<td>1439.</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Df Residuals:</td>
+<td>677</td>
+<td data-quarto-table-cell-role="th">BIC:</td>
+<td>1507.</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Df Model:</td>
+<td>14</td>
+<td data-quarto-table-cell-role="th"></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Covariance Type:</td>
+<td>nonrobust</td>
+<td data-quarto-table-cell-role="th"></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table class="simpletable caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<tbody>
+<tr class="odd">
+<td></td>
+<td data-quarto-table-cell-role="th">coef</td>
+<td data-quarto-table-cell-role="th">std err</td>
+<td data-quarto-table-cell-role="th">t</td>
+<td data-quarto-table-cell-role="th">P&gt;|t|</td>
+<td data-quarto-table-cell-role="th">[0.025</td>
+<td data-quarto-table-cell-role="th">0.975]</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">const</td>
+<td>2.4801</td>
+<td>0.062</td>
+<td>40.260</td>
+<td>0.000</td>
+<td>2.359</td>
+<td>2.601</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Electric Vehicle Type</td>
+<td>-0.6218</td>
+<td>0.052</td>
+<td>-12.031</td>
+<td>0.000</td>
+<td>-0.723</td>
+<td>-0.520</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Adjust gross income (AGI) [8]</td>
+<td>4878.8058</td>
+<td>316.580</td>
+<td>15.411</td>
+<td>0.000</td>
+<td>4257.210</td>
+<td>5500.402</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Total income amount</td>
+<td>-4878.8058</td>
+<td>316.580</td>
+<td>-15.411</td>
+<td>0.000</td>
+<td>-5500.402</td>
+<td>-4257.210</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Taxable pensions and annuities amount</td>
+<td>8.226e-06</td>
+<td>2.46e-06</td>
+<td>3.344</td>
+<td>0.001</td>
+<td>3.4e-06</td>
+<td>1.31e-05</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Number of farm returns</td>
+<td>-0.0028</td>
+<td>0.001</td>
+<td>-5.351</td>
+<td>0.000</td>
+<td>-0.004</td>
+<td>-0.002</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Total statutory adjustments amount</td>
+<td>4878.8059</td>
+<td>316.580</td>
+<td>15.411</td>
+<td>0.000</td>
+<td>4257.210</td>
+<td>5500.402</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Total standard deduction amount</td>
+<td>-0.0502</td>
+<td>0.009</td>
+<td>-5.880</td>
+<td>0.000</td>
+<td>-0.067</td>
+<td>-0.033</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Basic standard deduction amount</td>
+<td>0.0502</td>
+<td>0.009</td>
+<td>5.881</td>
+<td>0.000</td>
+<td>0.033</td>
+<td>0.067</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Additional standard deduction amount</td>
+<td>0.0501</td>
+<td>0.009</td>
+<td>5.866</td>
+<td>0.000</td>
+<td>0.033</td>
+<td>0.067</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Limited state and local taxes</td>
+<td>5.08e-05</td>
+<td>1.1e-05</td>
+<td>4.626</td>
+<td>0.000</td>
+<td>2.92e-05</td>
+<td>7.24e-05</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Home mortgage from personal seller amount</td>
+<td>-0.0014</td>
+<td>0.000</td>
+<td>-4.739</td>
+<td>0.000</td>
+<td>-0.002</td>
+<td>-0.001</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Alternative minimum tax amount</td>
+<td>-0.0003</td>
+<td>5.88e-05</td>
+<td>-4.661</td>
+<td>0.000</td>
+<td>-0.000</td>
+<td>-0.000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Child and dependent care credit amount</td>
+<td>-0.0044</td>
+<td>0.001</td>
+<td>-4.000</td>
+<td>0.000</td>
+<td>-0.007</td>
+<td>-0.002</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Net premium tax credit amount</td>
+<td>0.0012</td>
+<td>0.000</td>
+<td>3.219</td>
+<td>0.001</td>
+<td>0.000</td>
+<td>0.002</td>
+</tr>
+</tbody>
+</table>
+<table class="simpletable caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Omnibus:</td>
+<td>30.695</td>
+<td data-quarto-table-cell-role="th">Durbin-Watson:</td>
+<td>1.862</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Prob(Omnibus):</td>
+<td>0.000</td>
+<td data-quarto-table-cell-role="th">Jarque-Bera (JB):</td>
+<td>36.205</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Skew:</td>
+<td>-0.460</td>
+<td data-quarto-table-cell-role="th">Prob(JB):</td>
+<td>1.37e-08</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Kurtosis:</td>
+<td>3.640</td>
+<td data-quarto-table-cell-role="th">Cond. No.</td>
+<td>5.19e+10</td>
+</tr>
+</tbody>
+</table>
+<br><br>Notes:<br>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.<br>[2] The condition number is large, 5.19e+10. This might indicate that there are<br>strong multicollinearity or other numerical problems.
+</div>
+</div>
+<div id="9d34c38a" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>_<span class="co"># model values</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>model_fitted_y <span class="op">=</span> results2mod.fittedvalues</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># model residuals</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>model_residuals <span class="op">=</span> results2mod.resid</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co"># normalized residuals</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>model_norm_residuals <span class="op">=</span> results2mod.get_influence().resid_studentized_internal</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="co"># absolute squared normalized residuals</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>model_norm_residuals_abs_sqrt <span class="op">=</span> np.sqrt(np.<span class="bu">abs</span>(model_norm_residuals))</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="co"># absolute residuals</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>model_abs_resid <span class="op">=</span> np.<span class="bu">abs</span>(model_residuals)</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="co"># leverage, from statsmodels internals</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>model_leverage <span class="op">=</span> results2mod.get_influence().hat_matrix_diag</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model_leverage)</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a><span class="co"># cook's distance, from statsmodels internals</span></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>model_cooks <span class="op">=</span> results2mod.get_influence().cooks_distance[<span class="dv">0</span>]</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>plot_lm_1 <span class="op">=</span> plt.figure()</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>plot_lm_1.axes[<span class="dv">0</span>] <span class="op">=</span> sns.residplot(x<span class="op">=</span>model_fitted_y, y<span class="op">=</span>dataframe.columns[<span class="op">-</span><span class="dv">1</span>], data<span class="op">=</span>dataframe,</span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>                          lowess<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>                          scatter_kws<span class="op">=</span>{<span class="st">'alpha'</span>: <span class="fl">0.5</span>},</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>                          line_kws<span class="op">=</span>{<span class="st">'color'</span>: <span class="st">'red'</span>, <span class="st">'lw'</span>: <span class="dv">1</span>, <span class="st">'alpha'</span>: <span class="fl">0.8</span>})</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>plot_lm_1.axes[<span class="dv">0</span>].set_title(<span class="st">'Residuals vs Fitted'</span>)</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>plot_lm_1.axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Fitted values'</span>)</span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>plot_lm_1.axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Residuals'</span>)</span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> DataFrame()</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'res'</span>] <span class="op">=</span> model_residuals</span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'fitted'</span>] <span class="op">=</span> model_fitted_y</span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'count'</span>] <span class="op">=</span> dataframe[<span class="st">'Vehicle Count'</span>]</span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'index'</span>] <span class="op">=</span> df.index</span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true" tabindex="-1"></a>maxr <span class="op">=</span> np.<span class="bu">max</span>(model_residuals)</span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true" tabindex="-1"></a>df.sort_values(<span class="st">'res'</span>, ascending<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[0.03525611 0.039225   0.01487122 0.00874636 0.00590415 0.00875526
+ 0.00800398 0.02285683 0.00545201 0.01334578 0.0811488  0.02359854
+ 0.00759434 0.00685633 0.14799608 0.02703123 0.02906513 0.00788093
+ 0.00579145 0.02489711 0.02759183 0.01371277 0.00672365 0.01611815
+ 0.01306701 0.17178105 0.02092151 0.00705875 0.00516001 0.0076401
+ 0.13152684 0.00907606 0.00825388 0.03911624 0.01545816 0.00696123
+ 0.03931674 0.03714806 0.01593949 0.00954329 0.00693676 0.01230752
+ 0.01754009 0.01353147 0.01009108 0.00714706 0.03576743 0.03775299
+ 0.00787123 0.03055028 0.01359205 0.00698326 0.03703795 0.01431177
+ 0.03662937 0.00492135 0.00858467 0.00548631 0.02448059 0.02922311
+ 0.00787438 0.00591814 0.05665515 0.00710806 0.01295809 0.005458
+ 0.00625288 0.00528592 0.0216746  0.01358587 0.008252   0.00514031
+ 0.00827571 0.02528284 0.00962029 0.00592185 0.0080537  0.00607325
+ 0.00634103 0.01613907 0.02466499 0.00626761 0.02454997 0.07270067
+ 0.01663246 0.01838949 0.00616334 0.01795831 0.0084373  0.00863078
+ 0.00814307 0.01260138 0.00758044 0.01127925 0.00831797 0.0407496
+ 0.01466007 0.02912169 0.01205459 0.00828782 0.00779161 0.03936169
+ 0.02165961 0.00655782 0.007018   0.00616645 0.01639544 0.04196668
+ 0.02477444 0.00779982 0.03136652 0.03014067 0.00580593 0.00720368
+ 0.01495714 0.02141654 0.0281808  0.28764171 0.01135092 0.01775435
+ 0.0201153  0.01353675 0.00764162 0.00578396 0.0051021  0.00748928
+ 0.02510992 0.00672122 0.03713105 0.02969563 0.02380133 0.01904516
+ 0.05225004 0.01325588 0.0052824  0.00686744 0.00655966 0.02293005
+ 0.00559006 0.01231273 0.00679423 0.00689724 0.00941989 0.02172786
+ 0.00864216 0.014961   0.03980604 0.05544579 0.00681478 0.03443495
+ 0.00706105 0.01659216 0.03092415 0.00521454 0.00614383 0.00493659
+ 0.008272   0.01571274 0.05076864 0.00600825 0.0106862  0.00620129
+ 0.00572081 0.02199284 0.00536602 0.02838846 0.00763093 0.02323339
+ 0.00732059 0.00627448 0.01273704 0.0270875  0.01391848 0.0441275
+ 0.03194747 0.0105352  0.01684084 0.00989165 0.00734757 0.01176914
+ 0.01524375 0.03121861 0.01283163 0.00838088 0.02531443 0.04379743
+ 0.00577734 0.00643926 0.03880562 0.00637882 0.13307385 0.02066032
+ 0.00698565 0.00589097 0.00746713 0.00667631 0.03455574 0.00796668
+ 0.01133154 0.00879965 0.00776851 0.01365342 0.02353425 0.0131082
+ 0.00716086 0.00917675 0.00782732 0.00457718 0.02709774 0.28830562
+ 0.00808753 0.01430108 0.04358078 0.02814064 0.01558179 0.04111961
+ 0.04363915 0.01098797 0.01450604 0.02231653 0.00537883 0.01266157
+ 0.00851008 0.01332947 0.00772112 0.00826207 0.01689659 0.02244193
+ 0.06673456 0.02051447 0.00763473 0.01111636 0.01126617 0.00763643
+ 0.00627942 0.01173011 0.03055205 0.00826857 0.03539036 0.00517105
+ 0.00732527 0.00612635 0.03374622 0.03391447 0.02373731 0.01125643
+ 0.00813012 0.03982881 0.00630702 0.02196621 0.02099162 0.01562215
+ 0.06899952 0.01638507 0.00527722 0.04336387 0.00617776 0.0559935
+ 0.00519425 0.01369904 0.01424319 0.01260499 0.01147067 0.03295644
+ 0.01236822 0.05579345 0.0076271  0.01312569 0.0252122  0.0060211
+ 0.00532617 0.01391349 0.00709174 0.00663597 0.00879147 0.00615951
+ 0.00752414 0.01867476 0.02513795 0.0435094  0.03909275 0.02766327
+ 0.03151463 0.01083387 0.2425412  0.00654167 0.14719381 0.03153335
+ 0.00679469 0.00676516 0.04016901 0.01629429 0.01895446 0.01230372
+ 0.00618604 0.007018   0.01785961 0.01533541 0.00698829 0.02224053
+ 0.07945398 0.00891405 0.00754565 0.00754162 0.00562525 0.01866964
+ 0.02281642 0.02891489 0.00802292 0.03068183 0.03229792 0.01916307
+ 0.00706966 0.0287041  0.01618634 0.01391927 0.00538199 0.01295457
+ 0.00655711 0.01547667 0.12899754 0.01141195 0.01095028 0.01336233
+ 0.00746276 0.00560568 0.01316151 0.02024718 0.01072795 0.00871008
+ 0.00735394 0.02435629 0.01827007 0.01162996 0.13084819 0.00675567
+ 0.00749575 0.01334144 0.03199807 0.0071623  0.03454991 0.01302
+ 0.01432919 0.01072714 0.02096574 0.01726987 0.0230622  0.00746689
+ 0.0078124  0.02382364 0.02043861 0.03763327 0.01367824 0.0050333
+ 0.03125579 0.0112506  0.00492117 0.03074677 0.00908173 0.03808673
+ 0.00790404 0.00564384 0.01316459 0.00851437 0.00611745 0.00539621
+ 0.01284658 0.01521138 0.0055583  0.00567175 0.02517346 0.0254444
+ 0.01081173 0.02437024 0.00785013 0.00659277 0.01865158 0.01357988
+ 0.00834752 0.00849545 0.01010624 0.00818591 0.01383923 0.00779023
+ 0.00682675 0.00594653 0.0418308  0.01846211 0.0339892  0.00765586
+ 0.00735409 0.01428603 0.02688787 0.0047788  0.00576197 0.00718164
+ 0.00725304 0.07566649 0.01181407 0.02231868 0.01154082 0.00651685
+ 0.00530863 0.01498731 0.0288083  0.03969526 0.0134019  0.06842505
+ 0.00801055 0.00587046 0.05803217 0.00865254 0.03401171 0.01918831
+ 0.05720542 0.00706425 0.01433592 0.00746273 0.08132398 0.0092566
+ 0.02143827 0.0059466  0.00730166 0.00778267 0.01079942 0.01304595
+ 0.00576526 0.0077121  0.02467312 0.00479818 0.00697713 0.00824968
+ 0.00925271 0.11690721 0.00684093 0.00685497 0.00484195 0.00903173
+ 0.01910573 0.03388334 0.00868063 0.00751077 0.02288169 0.02243728
+ 0.00749774 0.01360791 0.005494   0.00767477 0.01637126 0.01618911
+ 0.05821017 0.00777597 0.00964769 0.04131814 0.02156629 0.01376585
+ 0.01387869 0.02995164 0.00555902 0.00606544 0.00791852 0.06860345
+ 0.01830639 0.00448671 0.02190795 0.03275156 0.03651632 0.00775369
+ 0.02245264 0.00789934 0.0249734  0.01016952 0.01134918 0.01080319
+ 0.01336078 0.00859572 0.01041087 0.0132314  0.0070609  0.01548604
+ 0.00860173 0.00574157 0.01196574 0.01757851 0.03070166 0.00798548
+ 0.00685552 0.03190431 0.00706358 0.01153922 0.01093371 0.00781611
+ 0.02039379 0.00599479 0.00489536 0.01236021 0.00657178 0.00708048
+ 0.07542965 0.0077721  0.007247   0.01647099 0.0244408  0.01802711
+ 0.00659628 0.00503074 0.02836715 0.07539018 0.03953726 0.01319498
+ 0.0065557  0.0234332  0.01316631 0.04179488 0.00599179 0.02798267
+ 0.01433148 0.05703643 0.00544918 0.00589331 0.00791172 0.0102074
+ 0.01630441 0.00826996 0.00778909 0.06672367 0.00552071 0.02425296
+ 0.00763906 0.01698293 0.00579651 0.0182572  0.00865435 0.01338163
+ 0.01059065 0.05316265 0.02064933 0.01280615 0.08681002 0.08125394
+ 0.00569777 0.05745592 0.05419134 0.01144267 0.00553031 0.01053033
+ 0.17118631 0.00712968 0.00473642 0.05277205 0.00964821 0.010508
+ 0.00579277 0.00871113 0.01005752 0.01367217 0.0057347  0.00955097
+ 0.01302407 0.00959239 0.01100935 0.02982684 0.02682657 0.00730288
+ 0.00687947 0.04287148 0.03138395 0.00584308 0.00773932 0.01075671
+ 0.03208089 0.18727128 0.0158245  0.04417607 0.01522929 0.04072084
+ 0.01806706 0.0152512  0.02177716 0.00711251 0.01490824 0.00629575
+ 0.01523098 0.00803364 0.01247695 0.08740769 0.0242534  0.01265887
+ 0.01457549 0.0247994  0.02183267 0.00649749 0.01261855 0.01429066
+ 0.01402337 0.02147945 0.01093315 0.0567453  0.00690366 0.04019641
+ 0.00754393 0.0068687  0.00628327 0.02331892 0.01794491 0.0055543
+ 0.00722048 0.0235387  0.01538116 0.08844036 0.0126489  0.03057321
+ 0.00680776 0.03092819 0.00687324 0.00871059 0.18596449 0.01001691
+ 0.01369089 0.05083903 0.01374081 0.00669621 0.00826797 0.04148963
+ 0.00770688 0.00534339 0.01176318 0.01170381 0.02059501 0.01099234
+ 0.00701471 0.03117887 0.01524258 0.02497599 0.03886723 0.00710467
+ 0.0076601  0.0200341  0.00860491 0.00510067 0.01322176 0.24421462
+ 0.00844011 0.0062911  0.02643949 0.00529323 0.01261211 0.0109823
+ 0.0100667  0.0060252  0.02594605 0.01758442 0.00736367 0.05420183
+ 0.01903927 0.01320617 0.0076063  0.02861324 0.12590474 0.00651605
+ 0.00756745 0.01840831 0.01093633 0.01662771 0.00881548 0.01114529
+ 0.00931385 0.0066551  0.01086527 0.0691502  0.00664894 0.01076554
+ 0.01320509 0.00743568 0.0105769  0.05848408 0.01305761 0.01317632
+ 0.04330766 0.01289857 0.01790109 0.02692127 0.01570066 0.00609552
+ 0.20570934 0.02322767 0.02678635 0.0091956  0.01152934 0.01632824
+ 0.01304417 0.11700495]</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">res</th>
+<th data-quarto-table-cell-role="th">fitted</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">263</td>
+<td>-2.237358</td>
+<td>2.237358</td>
+<td>0.000000</td>
+<td>263</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">304</td>
+<td>-2.137870</td>
+<td>2.137870</td>
+<td>0.000000</td>
+<td>304</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">692</td>
+<td>-2.095384</td>
+<td>2.788531</td>
+<td>0.693147</td>
+<td>692</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">463</td>
+<td>-2.032107</td>
+<td>2.032107</td>
+<td>0.000000</td>
+<td>463</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">717</td>
+<td>-1.978701</td>
+<td>1.978701</td>
+<td>0.000000</td>
+<td>717</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">60</td>
+<td>1.539354</td>
+<td>3.205578</td>
+<td>4.744932</td>
+<td>60</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">24</td>
+<td>1.547574</td>
+<td>3.594089</td>
+<td>5.141664</td>
+<td>24</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">110</td>
+<td>2.016415</td>
+<td>3.694012</td>
+<td>5.710427</td>
+<td>110</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">257</td>
+<td>2.076152</td>
+<td>1.101902</td>
+<td>3.178054</td>
+<td>257</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">111</td>
+<td>2.098273</td>
+<td>3.072211</td>
+<td>5.170484</td>
+<td>111</td>
+</tr>
+</tbody>
+</table>
+
+<p>692 rows × 4 columns</p>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-20-output-3.png" width="582" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="normal-q-q-plot-1" class="level4">
+<h4 class="anchored" data-anchor-id="normal-q-q-plot-1">Normal Q-Q Plot</h4>
+<p>This plot shows if the residuals are normally distributed. A good normal QQ plot has all of the residuals lying on or close to the red line.</p>
+<div id="8243b712" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>QQ <span class="op">=</span> ProbPlot(model_norm_residuals)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>plot_lm_2 <span class="op">=</span> QQ.qqplot(line<span class="op">=</span><span class="st">'45'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">'#4C72B0'</span>, lw<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>plot_lm_2.axes[<span class="dv">0</span>].set_title(<span class="st">'Normal Q-Q'</span>)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>plot_lm_2.axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Theoretical Quantiles'</span>)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>plot_lm_2.axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Standardized Residuals'</span>)</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co"># annotations</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>abs_norm_resid <span class="op">=</span> np.flip(np.argsort(np.<span class="bu">abs</span>(model_norm_residuals)), <span class="dv">0</span>)</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>abs_norm_resid_top_3 <span class="op">=</span> abs_norm_resid[:<span class="dv">3</span>]</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r, i <span class="kw">in</span> <span class="bu">enumerate</span>(abs_norm_resid_top_3):</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    plot_lm_2.axes[<span class="dv">0</span>].annotate(i,</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>                               xy<span class="op">=</span>(np.flip(QQ.theoretical_quantiles, <span class="dv">0</span>)[r],</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>                                   model_norm_residuals[i]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-21-output-1.png" width="582" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="scale-location-1" class="level4">
+<h4 class="anchored" data-anchor-id="scale-location-1">Scale-Location</h4>
+<p>This plot is a way to check if the residuals suffer from non-constant variance, aka heteroscedasticity.</p>
+<div id="8ebfc233" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>plot_lm_3 <span class="op">=</span> plt.figure()</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(model_fitted_y, model_norm_residuals_abs_sqrt, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>sns.regplot(</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>model_fitted_y, </span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>model_norm_residuals_abs_sqrt,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    scatter<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    ci<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    lowess<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    line_kws<span class="op">=</span>{<span class="st">'color'</span>: <span class="st">'red'</span>, <span class="st">'lw'</span>: <span class="dv">1</span>, <span class="st">'alpha'</span>: <span class="fl">0.8</span>})</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>plot_lm_3.axes[<span class="dv">0</span>].set_title(<span class="st">'Scale-Location'</span>)</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>plot_lm_3.axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Fitted values'</span>)</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>plot_lm_3.axes[<span class="dv">0</span>].set_ylabel(<span class="st">'$\sqrt{|Standardized Residuals|}$'</span>)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="co"># annotations</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>abs_sq_norm_resid <span class="op">=</span> np.flip(np.argsort(model_norm_residuals_abs_sqrt), <span class="dv">0</span>)</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>abs_sq_norm_resid_top_3 <span class="op">=</span> abs_sq_norm_resid[:<span class="dv">3</span>]</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r, i <span class="kw">in</span> <span class="bu">enumerate</span>(abs_sq_norm_resid_top_3):</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    plot_lm_3.axes[<span class="dv">0</span>].annotate(</span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>        i,</span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>        xy<span class="op">=</span>(model_fitted_y[i],</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>        model_norm_residuals_abs_sqrt[i]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-22-output-1.png" width="602" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="residuals-vs.-leverage-1" class="level4">
+<h4 class="anchored" data-anchor-id="residuals-vs.-leverage-1">Residuals vs.&nbsp;Leverage</h4>
+<p>Unlike outliers, which have an unusually large y value, leverage points have extreme x values. This may not seem so bad at face value, but it can have damaging effects on the model because the β coefficients are very sensitive to leverage points. The purpose of the Residuals vs Leverage plot is to identify these problematic observations.</p>
+<div id="25633f31" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>plot_lm_4 <span class="op">=</span> plt.figure()</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(model_leverage, model_norm_residuals, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>sns.regplot(x<span class="op">=</span>model_leverage, y<span class="op">=</span>model_norm_residuals,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>            scatter<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>            ci<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>            lowess<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>            line_kws<span class="op">=</span>{<span class="st">'color'</span>: <span class="st">'red'</span>, <span class="st">'lw'</span>: <span class="dv">1</span>, <span class="st">'alpha'</span>: <span class="fl">0.8</span>})</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>plot_lm_4.axes[<span class="dv">0</span>].set_xlim(<span class="dv">0</span>, np.<span class="bu">max</span>(model_leverage)<span class="op">+</span><span class="fl">0.01</span>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>plot_lm_4.axes[<span class="dv">0</span>].set_ylim(<span class="op">-</span><span class="dv">3</span>, <span class="dv">5</span>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>plot_lm_4.axes[<span class="dv">0</span>].set_title(<span class="st">'Residuals vs Leverage'</span>)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>plot_lm_4.axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Leverage'</span>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>plot_lm_4.axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Standardized Residuals'</span>)</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="co"># annotations</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>leverage_top_3 <span class="op">=</span> np.flip(np.argsort(model_cooks), <span class="dv">0</span>)[:<span class="dv">3</span>]</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> leverage_top_3:</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>    plot_lm_4.axes[<span class="dv">0</span>].annotate(i,</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>                                xy<span class="op">=</span>(model_leverage[i],</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>                                    model_norm_residuals[i]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-23-output-1.png" width="585" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="9c2ad197" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cookdplot(model, ax<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ax <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>        fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    cooks_d <span class="op">=</span> model.get_influence().cooks_distance[<span class="dv">0</span>]</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    ax.vlines(<span class="bu">range</span>(<span class="bu">len</span>(cooks_d)),<span class="dv">0</span>,cooks_d)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># annotations</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    cookd_top_3 <span class="op">=</span> np.flip(np.argsort(cooks_d), <span class="dv">0</span>)[:<span class="dv">3</span>]</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> cookd_top_3:</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>        ax.annotate(i, xy<span class="op">=</span>(i, cooks_d[i]),color <span class="op">=</span> <span class="st">'C3'</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="st">"Cook's Distance"</span> , fontweight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">'Obs. Number'</span>)</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="st">"Cook's distance"</span>)</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ax</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>cookdplot(results2mod)</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="eda-ev_files/figure-html/cell-24-output-1.png" width="593" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

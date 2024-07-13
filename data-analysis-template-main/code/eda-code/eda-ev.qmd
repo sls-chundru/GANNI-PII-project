@@ -5,9 +5,21 @@ output: html_document
 execute: 
   error: False
   warning: False
+bibliography: "`r here::here( 'biblography.bib')`"
 ---
+```{r setup, include=FALSE}
+library(here)
+```
+
+**Electric Vehicle Data Analysis**
+
+# Introduction:
+
+This document is an exploratory data analysis of electric vehicle data. The data was obtained from the IRS and contains information on electric vehicles, their owners, and the tax benefits they receive. The data was cleaned and processed in R and saved as a CSV file. This document will load the data, explore it, and fit a linear regression model to predict the number of electric vehicles in a given zip code.
 
 # Setup
+
+
 
 ```{python}
 #load needed packages. make sure they are installed.
@@ -26,7 +38,6 @@ from scipy import stats
 set_option('display.max_columns', None)
 ```
 
-
 Load the data.
 
 ```{python}
@@ -39,7 +50,8 @@ numeric_cols = columns_list[28:]
 df.columns.tolist()
 ```
 
-Vehicle Brand Aggregation
+Vehicle Brand Aggregation:
+
 ```{python}
 sns.set_style('darkgrid')
 zip_code_count = df.groupby(['ZIPCODE', 'Electric Vehicle Type']).agg({
@@ -52,7 +64,6 @@ log_zip_code_count['Vehicle Count'] = np.log(zip_code_count['Vehicle Count'])
 sns.histplot(ax=axes[1], data=log_zip_code_count, y=log_zip_code_count['Vehicle Count'])
 ```
 
-
 ```{python}
 fig, axes = plt.subplots(2, 1, figsize=(15,15))
 sns.boxplot(ax=axes[0], data=zip_code_count, x=zip_code_count['Vehicle Count'])
@@ -62,6 +73,7 @@ sns.boxplot(ax=axes[1], data=log_zip_code_count, x=log_zip_code_count['Vehicle C
 ```
 
 MAKE AND ELECTRIC VEHICLE TYPE
+
 ```{python}
 sns.set_style('darkgrid')
 make_ev_type = df.groupby(['Make', 'Electric Vehicle Type']).agg({
@@ -83,6 +95,7 @@ sns.boxplot(ax=axes[1], data=log_make_ev_type, x=make_ev_type['Electric Vehicle 
 ```
 
 MAKE AND Clean Alt Fuel
+
 ```{python}
 sns.set_style('darkgrid')
 make_ev_type = df.groupby(['Make', 'Clean Alternative Fuel Vehicle (CAFV) Eligibility']).agg({
@@ -103,8 +116,8 @@ log_make_ev_type['Vehicle Count'] = np.log(make_ev_type['Vehicle Count'])
 sns.boxplot(ax=axes[1], data=log_make_ev_type, x=make_ev_type['Clean Alternative Fuel Vehicle (CAFV) Eligibility'], y=log_make_ev_type['Vehicle Count'])
 ```
 
+Mean
 
-Mean 
 ```{python}
 brand_df = df[[
  'Residential energy tax credit amount', 'Total income amount', 'Vehicle Count'
@@ -116,7 +129,6 @@ brand_df.corr()
 # brand_df['Electric Range'] = np.log(brand_df['Electric Range'])
 # sns.boxplot(ax=axes[1], data=brand_df, y=brand_df['Electric Range'])
 ```
-
 
 ```{python}
 new_brand_df  = df.groupby(['ZIPCODE']).agg({
@@ -154,6 +166,7 @@ for i in columns_list:
 ```
 
 ZIP CODE ONLY
+
 ```{python}
 amount_brand_df = df.groupby(['ZIPCODE', 'Electric Vehicle Type'])[numeric_cols].mean(numeric_only=True).reset_index()
 brand_df = df.groupby(['ZIPCODE', 'Electric Vehicle Type']).agg({
@@ -300,6 +313,7 @@ df.sort_values('fitted', ascending=False)
 ```
 
 #### Normal Q-Q Plot
+
 This plot shows if the residuals are normally distributed. A good normal QQ plot has all of the residuals lying on or close to the red line.
 
 ```{python}
@@ -319,6 +333,7 @@ for r, i in enumerate(abs_norm_resid_top_3):
 ```
 
 #### Scale-Location
+
 This plot is a way to check if the residuals suffer from non-constant variance, aka heteroscedasticity.
 
 ```{python}
@@ -346,6 +361,7 @@ for r, i in enumerate(abs_sq_norm_resid_top_3):
 ```
 
 #### Residuals vs. Leverage
+
 Unlike outliers, which have an unusually large y value, leverage points have extreme x values. This may not seem so bad at face value, but it can have damaging effects on the model because the β coefficients are very sensitive to leverage points. The purpose of the Residuals vs Leverage plot is to identify these problematic observations.
 
 ```{python}
@@ -369,7 +385,6 @@ for i in leverage_top_3:
                                 xy=(model_leverage[i],
                                     model_norm_residuals[i]))
 ```
-
 
 ```{python}
 def cookdplot(model, ax=None):
@@ -395,6 +410,7 @@ plt.show()
 ```
 
 ### SECOND MODEL
+
 ```{python}
 # merged_df = merged_df.loc[(merged_df['Vehicle Count'] != 1.94591)]
 # print(merged_df.loc[merged_df['Vehicle Count'] < 5].sort_values('Vehicle Count', ascending=False).head(30))
@@ -472,7 +488,6 @@ results2mod.summary()
 # sns.regplot(x=y_test, y=Y_pred)
 ```
 
-
 ```{python}
 _# model values
 model_fitted_y = results2mod.fittedvalues
@@ -515,6 +530,7 @@ df.sort_values('res', ascending=True)
 ```
 
 #### Normal Q-Q Plot
+
 This plot shows if the residuals are normally distributed. A good normal QQ plot has all of the residuals lying on or close to the red line.
 
 ```{python}
@@ -534,6 +550,7 @@ for r, i in enumerate(abs_norm_resid_top_3):
 ```
 
 #### Scale-Location
+
 This plot is a way to check if the residuals suffer from non-constant variance, aka heteroscedasticity.
 
 ```{python}
@@ -561,7 +578,10 @@ for r, i in enumerate(abs_sq_norm_resid_top_3):
 ```
 
 #### Residuals vs. Leverage
+
 Unlike outliers, which have an unusually large y value, leverage points have extreme x values. This may not seem so bad at face value, but it can have damaging effects on the model because the β coefficients are very sensitive to leverage points. The purpose of the Residuals vs Leverage plot is to identify these problematic observations.
+
+The residuals vs. leverage plot identifies any influential data points that could disproportionately affect the model. High leverage points and their residuals are plotted to see if they might be unduly influencing the regression results.
 
 ```{python}
 plot_lm_4 = plt.figure()
@@ -586,6 +606,7 @@ for i in leverage_top_3:
 ```
 
 
+
 ```{python}
 def cookdplot(model, ax=None):
     if ax is None:
@@ -608,3 +629,7 @@ def cookdplot(model, ax=None):
 cookdplot(results2mod)
 plt.show()
 ```
+
+### Conclusion
+
+In this analysis, two models were compared: the initial linear regression model and a refined model with selected features. The refined model showed improved performance with higher R-squared and lower AIC values, indicating a better fit. The selection of features based on statistical significance helped in enhancing the model's predictive accuracy. Ultimately, the refined model is preferred for predicting the number of electric vehicles in a given zip code due to its better performance metrics and more robust feature selection process.
